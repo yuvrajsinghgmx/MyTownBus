@@ -1,23 +1,10 @@
-import { Text } from "react-native";
-import { StatusBar} from "expo-status-bar";
-import { StyleSheet } from "react-native";
-import { View } from "react-native";
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
+import SearchCard from "../components/homepage/searchcard";
 
-export default function App() {
-    return (
-      <View style={styles.container}>
-        <Text>Yuvraj Singh Expo Router installed successfully</Text>
-        <StatusBar style="auto" />
-      </View>
-    );
-  }
-  
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: '#fff',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-  });
-  
+const Home = () => {
+  return (
+    SearchCard()
+  );
+};
+export default Home;

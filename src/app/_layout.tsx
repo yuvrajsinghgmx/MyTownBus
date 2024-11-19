@@ -1,20 +1,60 @@
-import { Slot,Stack} from "expo-router";
-import "../../global.css";
-import { View } from "react-native";
-import Navbar from "./components/Navbar";
+import { Tabs } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import React from "react";
 
-// export default Slot;
+const Layout = () => {
+  return (
+    <Tabs
+      screenOptions={{
+        headerShown:false,
+        tabBarActiveTintColor: "#d32f2f", 
+        tabBarInactiveTintColor: "gray",
+        tabBarStyle: {
+          backgroundColor: "white",
+          height: 60,
+          paddingBottom: 5,
+        },
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: "Home",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home-outline" size={size} color={color} />
+          ),
+        }}
+      />
+            <Tabs.Screen
+        name="bookings"
+        options={{
+          title: "Bookings",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="calendar-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="search"
+        options={{
+          title: "Help",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="help-outline" size={size} color={color} />
+          ),
+        }}
+      />
 
-export default function RootLayout(){
-    // return (
-    //     <Stack>
-    //         <Stack.Screen name="index" options={{title:'Home Screen'}}/>
-    //     </Stack>
-    // );
-    return (
-        <View className="flex-1 bg-gray-100">
-          <Slot />
-          <Navbar />
-        </View>
-      );
-}
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person-outline" size={size} color={color} />
+          ),
+        }}
+      />
+    </Tabs>
+  );
+};
+
+export default Layout;
