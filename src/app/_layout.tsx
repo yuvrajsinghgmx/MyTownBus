@@ -6,7 +6,7 @@ const Layout = () => {
   return (
     <Tabs
       screenOptions={{
-        headerShown:false,
+        headerTitle:"My Town Bus",
         tabBarActiveTintColor: "#d32f2f", 
         tabBarInactiveTintColor: "gray",
         tabBarStyle: {
@@ -35,7 +35,7 @@ const Layout = () => {
         }}
       />
       <Tabs.Screen
-        name="search"
+        name="help"
         options={{
           title: "Help",
           tabBarIcon: ({ color, size }) => (

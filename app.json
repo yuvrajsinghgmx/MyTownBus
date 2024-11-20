@@ -2,7 +2,7 @@
   "expo": {
     "name": "My Town Bus",
     "slug": "MyTownBus",
-      "scheme": "TownBusScheme",    
+    "scheme": "TownBusScheme",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -20,7 +20,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#d3a180"
-      }
+      },
+      "package": "com.anonymous.MyTownBus"
     },
     "web": {
       "favicon": "./assets/favicon.png"

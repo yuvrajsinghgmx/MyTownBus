@@ -17,9 +17,9 @@ const BookingScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       {/* Top Bar */}
-      <View style={styles.topBar}>
+      {/* <View style={styles.topBar}>
         <Text style={styles.title}>Bookings</Text>
-      </View>
+      </View> */}
 
       {/* Tab Row */}
       {/* <View style={styles.tabRow}>
