@@ -7,47 +7,14 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-// import Icon from "react-native-vector-icons/MaterialIcons";
-
 
 const BookingScreen = () => {
   const [selectedTab, setSelectedTab] = useState("Bus");
-
-
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Top Bar */}
-      {/* <View style={styles.topBar}>
-        <Text style={styles.title}>Bookings</Text>
-      </View> */}
-
-      {/* Tab Row */}
-      {/* <View style={styles.tabRow}>
-        {tabs.map((tab) => (
-          <TouchableOpacity
-            key={tab}
-            style={[
-              styles.tabButton,
-              selectedTab === tab && styles.selectedTab,
-            ]}
-            onPress={() => setSelectedTab(tab)}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                selectedTab === tab && styles.selectedTabText,
-              ]}
-            >
-              {tab}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View> */}
-
-      {/* Main Content */}
+    <View style={styles.container}>
       <View style={styles.mainContent}>
         <Image
-          source={require("./no-bookings.png")} // Replace with your icon path
+          source={require("./no-bookings.png")}
           style={styles.placeholderImage}
         />
         <Text style={styles.noBookingText}>You have no bookings yet</Text>
@@ -55,32 +22,7 @@ const BookingScreen = () => {
           <Text style={styles.bookNowText}>Book Now</Text>
         </TouchableOpacity>
       </View>
-
-      {/* Bottom Navigation */}
-      {/* <View style={styles.bottomNav}>
-        {bottomTabs.map((tab) => (
-          <TouchableOpacity
-            key={tab.name}
-            style={styles.navItem}
-            onPress={() => console.log(`${tab.name} clicked`)}
-          >
-            <Icon
-              name={tab.icon}
-              size={24}
-              color={tab.name === "Bookings" ? "#E74C3C" : "#000"}
-            />
-            <Text
-              style={[
-                styles.navText,
-                tab.name === "Bookings" && styles.selectedNavText,
-              ]}
-            >
-              {tab.name}
-            </Text>
-          </TouchableOpacity>
-        ))} */}
-      {/* </View> */}
-    </SafeAreaView>
+    </View>
   );
 };
 

@@ -1,10 +1,12 @@
 import React from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, StatusBar } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import Header from "../NavBar/topbar";
 
 const SearchCard = () => {
-  return (
+  return ( 
     <View style={styles.container}>
+
       {/* Leaving From Input */}
       <View style={styles.inputContainer}>
         <Ionicons name="location-outline" size={20} color="gray" />
