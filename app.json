@@ -27,7 +27,18 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-router"
-    ]
+      "expo-router",
+      "expo-build-properties",
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth"
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "f1e8657b-f62e-4875-8a02-66335eb0c40e"
+      }
+    }
   }
 }

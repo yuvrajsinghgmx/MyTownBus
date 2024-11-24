@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "70208552141",
+    "project_id": "mytownbus-72904",
+    "storage_bucket": "mytownbus-72904.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:70208552141:android:7396daffe34b96e1a13d84",
+        "android_client_info": {
+          "package_name": "com.anonymous.MyTownBus"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxotVHQpfFvrNKtmSu_f0G7AKrsTnTksY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
