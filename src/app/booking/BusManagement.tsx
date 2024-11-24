@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import { Text, View, TextInput, Button, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, router } from "expo-router";
-import DateTimePicker from '@react-native-datetimepicker/datetimepicker';
-
 
 export default function BusManagement() {
   const [busName, setBusName] = useState("");
