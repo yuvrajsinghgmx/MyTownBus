@@ -7,17 +7,34 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Link } from "expo-router";
 
 const BookingScreen = () => {
   const [selectedTab, setSelectedTab] = useState("Bus");
   return (
     <View style={styles.container}>
       <View style={styles.mainContent}>
+        <Link href={'./buses'}>
         <Image
           source={require("./no-bookings.png")}
           style={styles.placeholderImage}
         />
-        <Text style={styles.noBookingText}>You have no bookings yet</Text>
+        </Link>
+        <Link href={'./auth/Register'}>
+        <Text style={styles.noBookingText}>Register</Text>
+        </Link>
+        <Link href={'./auth/Login'}>
+        <Text style={styles.noBookingText}>Login</Text>
+        </Link>
+        <Link href={'./owner/AddBus'}>
+        <Text style={styles.noBookingText}>AddBus</Text>
+        </Link>
+        <Link href={'./owner/DeleteBus'}>
+        <Text style={styles.noBookingText}>Delete Bus</Text>
+        </Link>
+        <Link href={''}>
+        <Text style={styles.noBookingText}>Book Bus</Text>
+        </Link>
         <TouchableOpacity style={styles.bookNowButton}>
           <Text style={styles.bookNowText}>Book Now</Text>
         </TouchableOpacity>
