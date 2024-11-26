@@ -4,14 +4,14 @@ import Input from '../../components/Input';
 import Button from '../../components/Button';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+// 1c2fa151c70f155e4ae9f52c985ab3a9ad1d56cd
 const DeleteBus: React.FC = () => {
   const [busId, setBusId] = useState('');
-
+  const tok = "1c2fa151c70f155e4ae9f52c985ab3a9ad1d56cd"
   const handleDeleteBus = async () => {
     try {
     const token = await AsyncStorage.getItem('authToken');
-      const response = await axios.delete(`http://192.168.1.75:8000/api/buses/delete/${busId}/`,{ headers: { Authorization: `Token ${token}` } });
+      const response = await axios.delete(`http://192.168.1.75:8000/api/buses/delete/${busId}/`,{ headers: { Authorization: `Token ${tok}` } });
       console.log(response.data);
       alert('Bus deleted successfully!');
     } catch (error) {
