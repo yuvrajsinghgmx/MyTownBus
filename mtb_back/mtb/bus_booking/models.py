@@ -2,8 +2,27 @@ from django.db import models
 from django.contrib.auth.models import User
 import random
 import string
+from django.contrib import admin
+from django.db import models
+from datetime import datetime
 
-# User Profile
+class SeatType(models.Model):
+    SEAT_CHOICES = [
+        ('AC', 'AC'),
+        ('Non-AC', 'Non-AC'),
+        ('Sleeper', 'Sleeper'),
+        ('Sleeper Non-AC', 'Sleeper Non-AC'),
+    ]
+    
+    bus = models.ForeignKey('Bus', related_name='seat_types', on_delete=models.CASCADE)
+    seat_type = models.CharField(max_length=50, choices=SEAT_CHOICES)
+    available_seats = models.IntegerField()
+    price_per_seat = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.seat_type} - {self.available_seats} seats"
+
+
 class Profile(models.Model):
     USER_TYPES = (
         ('Owner', 'Owner'),
@@ -12,21 +31,23 @@ class Profile(models.Model):
     )
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     user_type = models.CharField(max_length=10, choices=USER_TYPES)
-    phone_number = models.CharField(max_length=15)
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
     address = models.TextField(blank=True)
-    bus_id = models.CharField(max_length=7)
+    bus_id = models.CharField(max_length=7, unique=True)  # Unique to each user
+
     def __str__(self):
         return f"{self.user.username} ({self.user_type})"
 
-# Bus Model
 class Bus(models.Model):
-    bus_id = models.CharField(max_length=7)
     name = models.CharField(max_length=100)
-    registration_number = models.CharField(max_length=15)
-    bus_type = models.CharField(max_length=50, choices=[('AC', 'AC'), ('Non-AC', 'Non-AC'), ('Sleeper', 'Sleeper'), ('Semi-Sleeper', 'Semi-Sleeper')])
+    registration_number = models.CharField(max_length=15, unique=True)
+    bus_type = models.CharField(
+        max_length=50, 
+        choices=[('AC', 'AC'), ('Non-AC', 'Non-AC'), ('Sleeper', 'Sleeper'), ('Semi-Sleeper', 'Semi-Sleeper')]
+    )
     total_seats = models.IntegerField()
     is_active = models.BooleanField(default=True)
-
+    bus_id = models.CharField(max_length=7) 
 
     def __str__(self):
         return f"{self.name} ({self.registration_number})"
@@ -82,3 +103,8 @@ class Feedback(models.Model):
 
     def __str__(self):
         return f"Feedback by {self.customer.user.username} for {self.bus.name}"
+
+class BusAdmin(admin.ModelAdmin):
+    list_display = ['bus_id', 'name', 'registration_number', 'bus_type', 'total_seats', 'is_active']
+    search_fields = ['name', 'registration_number', 'bus_id']
+    list_filter = ['bus_type', 'is_active']

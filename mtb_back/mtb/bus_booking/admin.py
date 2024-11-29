@@ -1,8 +1,8 @@
 from django.contrib import admin
-from .models import Profile, Bus, Route, BusSchedule, Seat, Booking, Feedback
+from .models import Profile, Bus, Route, BusSchedule, Seat, Booking, Feedback,BusAdmin  
 
 admin.site.register(Profile)
-admin.site.register(Bus)
+admin.site.register(Bus,BusAdmin)
 admin.site.register(Route)
 admin.site.register(BusSchedule)
 admin.site.register(Seat)

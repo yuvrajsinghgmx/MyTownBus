@@ -23,11 +23,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 class BusSerializer(serializers.ModelSerializer):
-    bus_id = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
     class Meta:
         model = Bus
-        fields = ['name', 'registration_number', 'bus_type', 'total_seats', 'is_active','bus_id']
-        
+        fields = ['name', 'registration_number', 'bus_type', 'total_seats', 'is_active','bus_id',]
+
 
 class RouteSerializer(serializers.ModelSerializer):
     class Meta:

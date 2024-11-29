@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { fetchBuses } from '../api/api';
 
-// Define the structure of a bus object
 interface Bus {
     id: number;
     name: string;
@@ -13,11 +12,11 @@ interface Bus {
 }
 
 export default function Buses() {
-    const [buses, setBuses] = useState<Bus[]>([]); // Type the state with an array of Bus objects
+    const [buses, setBuses] = useState<Bus[]>([]); 
 
     useEffect(() => {
         fetchBuses()
-            .then((data: Bus[]) => setBuses(data)) // Ensure the data matches the Bus interface
+            .then((data: Bus[]) => setBuses(data)) 
             .catch((error: any) => console.error("Error fetching buses:", error));
     }, []);
 

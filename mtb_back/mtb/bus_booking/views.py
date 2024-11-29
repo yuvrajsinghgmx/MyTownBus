@@ -12,13 +12,16 @@ from rest_framework.permissions import AllowAny
 import random
 import string
 
+def generate_unique_bus_id():
+    while True:
+        bus_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=7))
+        if not Profile.objects.filter(bus_id=bus_id).exists():
+            return bus_id
 
 
 
 
 
-def generate_random_code():
-    return ''.join(random.choices(string.digits, k=7)) 
 
 
 class LoginView(ObtainAuthToken):
@@ -47,26 +50,22 @@ class CancelBookingView(APIView):
             return Response({'message': 'Booking canceled successfully!'}, status=status.HTTP_204_NO_CONTENT)
         except Booking.DoesNotExist:
             return Response({'error': 'Booking not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
 class AddBusView(APIView):
+    
     permission_classes = [IsAuthenticated]
-
     def post(self, request):
-        try:
-            # Set the logged-in user as the owner
-            data = request.data.copy()
-            user = request.user
-            bus_id = user.profile.bus_id
-            data['bus_id']= bus_id
-            serializer = BusSerializer(data=data)
-
-            if serializer.is_valid():
-                serializer.save()
-                return Response({'message': 'Bus added successfully!'}, status=status.HTTP_201_CREATED)
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        user = request.user
+        profile = user.profile 
+        data = request.data.copy()
+        data['bus_id'] = profile.bus_id
+        serializer = BusSerializer(data=data)
+        print(f"{profile.bus_id}")
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'Bus added successfully!'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class DeleteBusView(APIView):
     permission_classes = [IsAuthenticated]
@@ -102,23 +101,27 @@ class BookingList(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 class UserRegistrationView(APIView):
     permission_classes = [AllowAny]
-    def post(self, request, *args, **kwargs):
+    
+    def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
         email = request.data.get('email', '')
         user_type = request.data.get('user_type')
-        bus_id = generate_random_code()
-
         if not username or not password:
             return Response({'error': 'Username and password are required'}, status=status.HTTP_400_BAD_REQUEST)
-
         if User.objects.filter(username=username).exists():
             return Response({'error': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
-
+        bus_id = generate_unique_bus_id()
+        print(f"{bus_id}")
         user = User.objects.create_user(username=username, password=password, email=email)
-        profile = Profile.objects.create(user=user, user_type=user_type)
+        Profile.objects.create(user=user, user_type=user_type, bus_id=bus_id)
+        return Response({
+            'message': 'User registered successfully',
+            'username': username,
+            'bus_id': bus_id
+        }, status=status.HTTP_201_CREATED)
 
-        return Response({'message': 'User registered successfully'}, status=status.HTTP_201_CREATED)
+
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -146,30 +149,6 @@ class RegisterView(APIView):
             return Response({"message": "User registered successfully!"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class AddBusView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        try:
-            profile = Profile.objects.get(user=request.user)
-            
-            # Only allow Owners to add a bus
-            if profile.user_type != 'Owner':
-                return Response({"error": "Only owners can add buses."}, status=status.HTTP_403_FORBIDDEN)
-
-            data = request.data.copy()
-            data['owner'] = profile.id
-            serializer = BusSerializer(data=data)
-
-            if serializer.is_valid():
-                serializer.save()
-                return Response({'message': 'Bus added successfully!'}, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Profile.DoesNotExist:
-            return Response({"error": "User profile not found."}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            print(f"Error adding bus: {e}")
-            return Response({"error": "Internal Server Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 class AdminView(APIView):
     permission_classes = [IsAuthenticated]
 
