@@ -1,5 +1,5 @@
 #!/bin/sh
-'''exec' "/home/yuvrajsingh/Codes/My Town Bus/mtb/venv/bin/python3" "$0" "$@"
+'''exec' "/home/yuvrajsingh/Codes/My Town Bus/mtb_back/venv/bin/python3" "$0" "$@"
 ' '''
 # -*- coding: utf-8 -*-
 import re
