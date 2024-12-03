@@ -1,19 +1,38 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import RNDateTimePicker from "@react-native-community/datetimepicker";
 import axios from "axios";
 
-import {Picker} from '@react-native-picker/picker';
+import { Picker } from '@react-native-picker/picker';
+
+const cities = [
+  { label: "Ahmedabad", value: "ahmedabad" },
+  { label: "Bangalore", value: "bangalore" },
+  { label: "Chennai", value: "chennai" },
+  { label: "Delhi", value: "delhi" },
+  { label: "Hyderabad", value: "hyderabad" },
+  { label: "Jaipur", value: "jaipur" },
+  { label: "Kolkata", value: "kolkata" },
+  { label: "Mumbai", value: "mumbai" },
+  { label: "Pune", value: "pune" },
+  { label: "Surat", value: "surat" },
+];
 
 interface Location {
   id: number;
+  location: string;
+}
+
+interface Category {
   name: string;
+  description: string;
 }
 
 interface Bus {
   id: number;
   bus_number: string;
+  category: Category;
 }
 
 interface Trip {
@@ -40,7 +59,7 @@ const SearchCard = () => {
   const handleSearch = async () => {
     try {
       const formattedDate = journeyDate.toISOString().split("T")[0];
-      const response = await axios.get("http://10.21.122.188:8000/api/scheduled-trips/", {
+      const response = await axios.get("http://192.168.1.75:8000/api/scheduled-trips/", {
         params: {
           depart: departureLocation,
           destination: arrivalLocation,
@@ -55,30 +74,39 @@ const SearchCard = () => {
   };
 
   return (
+    <ScrollView>
     <View style={styles.container}>
-      {/* Departure Location Input */}
-      <View style={styles.inputContainer}>
-        <Ionicons name="location-outline" size={20} color="gray" />
-        <TextInput
-          placeholder="Leaving From"
-          value={departureLocation}
-          onChangeText={setDepartureLocation}
-          style={styles.input}
-        />
+      <View className="  border-b border-gray-300 py-2 mb-4 ">
+        {/* <Ionicons name="location-outline" size={20} color="gray" className="mr-2 pr-0" /> */}
+        <Picker
+          placeholder="Departure"
+          selectedValue={departureLocation}
+          onValueChange={(itemValue) => setDepartureLocation(itemValue)}
+          className="text-gray-600  p-20 "
+        >
+          <Picker.Item label="Select Departure" value="" enabled={false} />
+          {cities.map((city) => (
+            <Picker.Item key={city.value} label={city.label} value={city.value} />
+          ))}
+        </Picker>
       </View>
 
-      {/* Arrival Location Input */}
-      <View style={styles.inputContainer}>
-        <Ionicons name="location-sharp" size={20} color="gray" />
-        <TextInput
-          placeholder="Going To"
-          value={arrivalLocation}
-          onChangeText={setArrivalLocation}
-          style={styles.input}
-        />
-      </View>
+      {/* Arrival Location */}
+      <View className="  border-b border-gray-300 py-2 mb-4">
+        {/* <Ionicons name="location-sharp" size={20} color="gray" className="mr-2" /> */}
+        <Picker
+          placeholder="Destination"
+          selectedValue={arrivalLocation}
+          onValueChange={(itemValue) => setArrivalLocation(itemValue)}
+          className="flex-1 text-gray-600"
+        >
+          <Picker.Item label="Select Destination" value="" enabled={false} />
 
-      {/* Journey Date Picker */}
+          {cities.map((city) => (
+            <Picker.Item key={city.value} label={city.label} value={city.value} />
+          ))}
+        </Picker>
+      </View>
       <View style={styles.dateContainer}>
         <Ionicons name="calendar-outline" size={20} color="gray" />
         <TouchableOpacity onPress={() => setShowPicker(true)} style={styles.dateContent}>
@@ -97,7 +125,7 @@ const SearchCard = () => {
 
 
 
-          
+
         </TouchableOpacity>
       </View>
 
@@ -115,17 +143,20 @@ const SearchCard = () => {
             <View key={trip.id} style={styles.trip}>
               <Text>Bus: {trip.bus.bus_number}</Text>
               <Text>
-                {trip.depart.name} to {trip.destination.name}
+                {trip.depart.location} to {trip.destination.location}
               </Text>
               <Text>Time: {new Date(trip.schedule).toLocaleString()}</Text>
-              <Text>Fare: ₹{trip.fare}</Text>
+              <Text>Fare: ₹{trip.fare} / Seat</Text>
+              <Text>Bus Type - {trip.bus.category.name}</Text>
+              <Text>{trip.bus.category.description}</Text>
             </View>
           ))
         ) : (
-          <Text>No trips found.</Text>
+          <Text>No buses available.</Text>
         )}
       </View>
     </View>
+    </ScrollView>
   );
 };
 
