@@ -1,10 +1,18 @@
-import React from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, StatusBar } from "react-native";
+import React, { useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import Header from "../NavBar/topbar";
+import RNDateTimePicker from '@react-native-community/datetimepicker';
 
 const SearchCard = () => {
-  return ( 
+  const [journeyDate, setJourneyDate] = useState(new Date());
+  const [showPicker, setShowPicker] = useState(false);
+
+  const handleDateChange = (event:any, selectedDate:any) => {
+    setShowPicker(false);
+    if (selectedDate) setJourneyDate(selectedDate);
+  };
+
+  return (
     <View style={styles.container}>
 
       {/* Leaving From Input */}
@@ -23,17 +31,27 @@ const SearchCard = () => {
       {/* Journey Date */}
       <View style={styles.dateContainer}>
         <Ionicons name="calendar-outline" size={20} color="gray" />
-        <View style={styles.dateContent}>
+        <TouchableOpacity onPress={() => setShowPicker(true)} style={styles.dateContent}>
           <Text style={styles.dateLabel}>Journey Date</Text>
           <View style={styles.dateRow}>
-            <Text style={styles.date}>NOV</Text>
+            <Text style={styles.date}>{journeyDate.toLocaleString('default', { month: 'short' }).toUpperCase()}</Text>
             <View style={styles.dateBox}>
-              <Text style={styles.day}>21</Text>
-              <Text style={styles.weekday}>Thu</Text>
+              <Text style={styles.day}>{journeyDate.getDate()}</Text>
+              <Text style={styles.weekday}>{journeyDate.toLocaleString('default', { weekday: 'short' })}</Text>
             </View>
           </View>
-        </View>
+        </TouchableOpacity>
       </View>
+
+      {/* Show Date Picker */}
+      {showPicker && (
+        <RNDateTimePicker
+          mode="date"
+          display="default"
+          value={journeyDate}
+          onChange={handleDateChange}
+        />
+      )}
 
       {/* Search Button */}
       <TouchableOpacity style={styles.searchButton}>
