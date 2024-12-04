@@ -50,6 +50,7 @@ const SearchCard = () => {
   const [journeyDate, setJourneyDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
   const [trips, setTrips] = useState<Trip[]>([]);
+  const [api,setapi] = useState('');
 
   const handleDateChange = (event: any, selectedDate: Date | undefined) => {
     setShowPicker(false);
@@ -59,7 +60,7 @@ const SearchCard = () => {
   const handleSearch = async () => {
     try {
       const formattedDate = journeyDate.toISOString().split("T")[0];
-      const response = await axios.get("http://192.168.1.75:8000/api/scheduled-trips/", {
+      const response = await axios.get(`http://${api}/api/scheduled-trips/`, {
         params: {
           depart: departureLocation,
           destination: arrivalLocation,
@@ -107,10 +108,18 @@ const SearchCard = () => {
           ))}
         </Picker>
       </View>
-      <View style={styles.dateContainer}>
+<TextInput
+placeholder="Enter APi"
+onChangeText={setapi}
+>
+  
+</TextInput>
+
+
+      <View  style={styles.dateContainer}>
+      <TouchableOpacity onPress={() => setShowPicker(true)} style={styles.dateContent}>
         <Ionicons name="calendar-outline" size={20} color="gray" />
-        <TouchableOpacity onPress={() => setShowPicker(true)} style={styles.dateContent}>
-          <Text style={styles.dateLabel}>Journey Date</Text>
+          {/* <Text style={styles.dateLabel}>Journey Date</Text> */}
           <View style={styles.dateRow}>
             <Text style={styles.date}>
               {journeyDate.toLocaleString("default", { month: "short" }).toUpperCase()}
@@ -121,6 +130,7 @@ const SearchCard = () => {
                 {journeyDate.toLocaleString("default", { weekday: "short" })}
               </Text>
             </View>
+          
           </View>
 
 
