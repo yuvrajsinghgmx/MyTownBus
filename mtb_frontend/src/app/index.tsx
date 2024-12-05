@@ -3,7 +3,6 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 
 import { Ionicons } from "@expo/vector-icons";
 import RNDateTimePicker from "@react-native-community/datetimepicker";
 import axios from "axios";
-
 import { Picker } from '@react-native-picker/picker';
 
 const cities = [
