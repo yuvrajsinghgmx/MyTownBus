@@ -5,7 +5,17 @@ from django.db import models
 from django.utils import timezone
 from django.dispatch import receiver
 from django.db.models import Sum
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin ,AbstractUser
+import random
+from django.utils.timezone import now
 
+
+class User(AbstractUser):
+    name = models.CharField(max_length=150)
+    age = models.PositiveIntegerField(null=True, blank=True)
+    gender = models.CharField(max_length=10, choices=[('Male', 'Male'), ('Female', 'Female'), ('Other', 'Other')], null=True, blank=True)
+    phone = models.CharField(max_length=15, unique=True)
+    address = models.TextField(null=True, blank=True)
 
 class Category(models.Model):
     name = models.CharField(max_length=250)

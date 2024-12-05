@@ -1,6 +1,6 @@
 
 from rest_framework import serializers
-from .models import Category, Location, Bus, Schedule, Booking
+from .models import Category, Location, Bus, Schedule, Booking,User 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -33,3 +33,22 @@ class BookingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Booking
         fields = ['id', 'code', 'name', 'schedule', 'seats', 'status', 'date_created', 'date_updated']
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'password', 'name', 'age', 'gender', 'phone', 'address']
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            password=validated_data['password'],
+            name=validated_data['name'],
+            age=validated_data.get('age'),
+            gender=validated_data.get('gender'),
+            phone=validated_data['phone'],
+            address=validated_data.get('address'),
+        )
+        return user

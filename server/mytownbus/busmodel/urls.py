@@ -1,6 +1,6 @@
 # urls.py
 from django.urls import path
-from .views import FindScheduledTripsView
+from .views import FindScheduledTripsView ,SignupView ,LoginView
 from . import views
 
 
@@ -24,4 +24,7 @@ urlpatterns = [
 
 
     path('api/scheduled-trips/', FindScheduledTripsView.as_view(), name='find_scheduled_trips'),
+
+    path('api/signup/', SignupView.as_view(), name='signup'),
+    path('api/login/', LoginView.as_view(), name='login'),
 ]
