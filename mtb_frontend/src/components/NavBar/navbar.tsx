@@ -20,8 +20,7 @@ export default function Navbar() {
      <Ionicons name="help-outline" size={size} color="red" />
       </TouchableOpacity>
       <TouchableOpacity onPress={() => router.push('/profile')}>
-           <Ionicons name="person-outline" size={size} color="red" />
-
+      <Ionicons name="person-outline" size={size} color="red" />
       </TouchableOpacity>
     </View>
   );

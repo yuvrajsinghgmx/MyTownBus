@@ -1,84 +1,77 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Alert } from "react-native";
 import InputField from "../../components/InputField";
 import CustomButton from "../../components/CustomButton";
 import Checkbox from "../../components/Checkbox";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut,} from "firebase/auth";
-import { auth } from "../../components/firebase/firebaseConfig";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 import { router } from "expo-router";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
-type RootStackParamList = {
-  OTPVerification: { mobileNumber: string; confirmationResult: any };
-};
+const API_BASE_URL = "http://192.168.1.75:8000/api";
 
-type Props = NativeStackScreenProps<RootStackParamList, "OTPVerification">;
-
-const LoginSignupScreen: React.FC<Props> = ({ navigation }) => {
+const LoginSignupScreen: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [hasReferralCode, setHasReferralCode] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [response, setResponse] = useState<any>();
 
   useEffect(() => {
     const checkSession = async () => {
-      const storedEmail = await AsyncStorage.getItem("userEmail");
-      const storedDisplayName = await AsyncStorage.getItem("userDisplayName");
-      if (storedEmail && storedDisplayName) {
+      const token = await AsyncStorage.getItem("authToken");
+      if (token) {
         router.push("./profilescreen");
       }
     };
-
     checkSession();
   }, []);
 
-  const handleLoginSignup = async () => {
+  const handleLogin = async () => {
     try {
-      const response = await signInWithEmailAndPassword(auth, email, password);
-      console.log(response);
-      if (auth.currentUser) {
-        await AsyncStorage.setItem("userEmail", auth.currentUser.email ?? "");
-        await AsyncStorage.setItem("userDisplayName", auth.currentUser.displayName ?? "");
-      }
+      const response = await axios.post(`${API_BASE_URL}/login/`, { email, password });
+      const { token } = response.data;
+
+      await AsyncStorage.setItem("authToken", token);
+      await AsyncStorage.setItem("userEmail", email);
+
       router.push("./profilescreen");
     } catch (error) {
-      console.log(error);
-    } finally {
-      setResponse(response);
+      Alert.alert("Login Failed", "Invalid credentials. Please try again.");
+      console.error(error);
     }
   };
 
-  const Signup = async () => {
+  const handleSignup = async () => {
     try {
-      const response = await createUserWithEmailAndPassword(auth, email, password);
-      console.log(response);
-      if (auth.currentUser) {
-        await updateProfile(auth.currentUser, {
-          displayName: "User Name",
-        });
-        await AsyncStorage.setItem("userEmail", auth.currentUser.email ?? "");
-        await AsyncStorage.setItem("userDisplayName", auth.currentUser.displayName ?? "");
-      }
+      const response = await axios.post(`${API_BASE_URL}/signup/`, { email, password });
+      const { token } = response.data;
+
+      await AsyncStorage.setItem("authToken", token);
+      await AsyncStorage.setItem("userEmail", email);
 
       router.push("./profilescreen");
     } catch (error) {
-      console.log(error);
-    } finally {
-      setResponse(response);
+      Alert.alert("Signup Failed", "Unable to register. Please try again.");
+      console.error(error);
     }
   };
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      const token = await AsyncStorage.getItem("authToken");
+      if (token) {
+        await axios.post(
+          `${API_BASE_URL}/logout/`,
+          {},
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+
+      await AsyncStorage.removeItem("authToken");
       await AsyncStorage.removeItem("userEmail");
-      await AsyncStorage.removeItem("userDisplayName");
+
       router.push("/login");
     } catch (error) {
-      console.log("Logout failed:", error);
+      Alert.alert("Logout Failed", "Unable to log out. Please try again.");
+      console.error(error);
     }
   };
 
@@ -95,6 +88,7 @@ const LoginSignupScreen: React.FC<Props> = ({ navigation }) => {
         label="Password*"
         placeholder="Enter Your Password"
         value={password}
+        // secureTextEntry
         onChangeText={setPassword}
       />
       <Checkbox
@@ -102,9 +96,8 @@ const LoginSignupScreen: React.FC<Props> = ({ navigation }) => {
         value={hasReferralCode}
         onValueChange={setHasReferralCode}
       />
-      <CustomButton title="Login" onPress={handleLoginSignup} />
-      <CustomButton title="SignUp" onPress={Signup} />
-      {/* <CustomButton title="Logout" onPress={handleLogout} /> Add a logout button */}
+      <CustomButton title="Login" onPress={handleLogin} />
+      <CustomButton title="SignUp" onPress={handleSignup} />
       <Text style={styles.footerText}>
         By Logging in, you agree to our{" "}
         <Text style={styles.linkText}>T&C</Text> and{" "}
@@ -127,11 +120,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 20,
     textAlign: "center",
-  },
-  orText: {
-    marginVertical: 10,
-    textAlign: "center",
-    color: "#999",
   },
   footerText: {
     marginTop: 20,

@@ -1,7 +1,11 @@
 # admin.py
 from django.contrib import admin
-from .models import Category, Location, Bus, Schedule, Booking
+from .models import Category, Location, Bus, Schedule, Booking ,User
 
+
+class UserAdmin(admin.ModelAdmin):
+    list_display = ['name', 'age']
+    search_fields = ['name']
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ['name', 'status', 'date_created', 'date_updated']
     search_fields = ['name', 'description']
@@ -22,6 +26,8 @@ class BookingAdmin(admin.ModelAdmin):
     list_display = ['code', 'name', 'schedule', 'seats', 'status', 'date_created', 'date_updated']
     search_fields = ['code', 'name', 'schedule__code']
 
+
+admin.site.register(User, UserAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Location, LocationAdmin)
 admin.site.register(Bus, BusAdmin)
