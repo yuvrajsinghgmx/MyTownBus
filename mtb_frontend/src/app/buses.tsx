@@ -62,8 +62,7 @@ export default function Buses() {
   );
 
   return (
-    <View className="flex-1 bg-gray-100 p-4">
-      {/* Header */}
+    <View className="flex-1 bg-gray-100 p-4 pb-0">
       <View className="bg-white p-4 rounded-lg shadow-md mb-4">
         <Text className="text-xl font-bold text-gray-800">Available Buses</Text>
         <Text className="text-gray-600">
@@ -71,15 +70,14 @@ export default function Buses() {
         </Text>
       </View>
 
-      {/* Bus Cards */}
-      <ScrollView className="space-y-4">
+      <ScrollView showsVerticalScrollIndicator={false} >
         {trips.length > 0 ? (
           trips.map((trip) => (
+            <View className=" pb-5   ">
             <View
               key={trip.id}
               className="bg-white p-4 rounded-lg shadow-md"
             >
-              {/* Bus Details */}
               <Text className="text-lg font-semibold text-gray-800">
                 Bus: {trip.bus.bus_number}
               </Text>
@@ -92,8 +90,6 @@ export default function Buses() {
               <Text className="text-gray-600">
                 Fare: ₹{trip.fare} / Seat
               </Text>
-
-              {/* Bus Type */}
               <View className="mt-2">
                 <Text className="text-gray-800 font-medium">
                   Type: {trip.bus.category.name}
@@ -102,12 +98,9 @@ export default function Buses() {
                   {trip.bus.category.description}
                 </Text>
               </View>
-
-              {/* Booking Button */}
               <TouchableOpacity
                 className="mt-4 bg-red-600 rounded-lg py-2"
                 onPress={() => {
-                  // Placeholder for booking logic
                   console.log("Booking trip:", trip.id);
                 }}
               >
@@ -116,6 +109,8 @@ export default function Buses() {
                 </Text>
               </TouchableOpacity>
             </View>
+            </View>
+            
           ))
         ) : (
           <Text className="text-gray-500 text-center mt-10">
