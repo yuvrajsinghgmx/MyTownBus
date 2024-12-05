@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
-import { useLocalSearchParams } from 'expo-router';
-import axios from 'axios';
+import React, { useState } from "react";
+import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { useLocalSearchParams } from "expo-router";
+import axios from "axios";
 
 interface Location {
   id: number;
@@ -36,6 +36,7 @@ export default function Buses() {
   useFocusEffect(
     React.useCallback(() => {
       let isActive = true;
+
       const fetchTrips = async () => {
         try {
           const response = await axios.get(`http://192.168.1.75:8000/api/scheduled-trips/`, {
@@ -61,36 +62,67 @@ export default function Buses() {
   );
 
   return (
-    <View style={styles.container}>
-      {trips.length > 0 ? (
-        trips.map((trip) => (
-          <View key={trip.id} style={styles.trip}>
-            <Text>Bus: {trip.bus.bus_number}</Text>
-            <Text>
-              {trip.depart.location} to {trip.destination.location}
-            </Text>
-            <Text>Time: {new Date(trip.schedule).toLocaleString()}</Text>
-            <Text>Fare: ₹{trip.fare} / Seat</Text>
-            <Text>Bus Type - {trip.bus.category.name}</Text>
-            <Text>{trip.bus.category.description}</Text>
-          </View>
-        ))
-      ) : (
-        <Text>No buses available.</Text>
-      )}
+    <View className="flex-1 bg-gray-100 p-4">
+      {/* Header */}
+      <View className="bg-white p-4 rounded-lg shadow-md mb-4">
+        <Text className="text-xl font-bold text-gray-800">Available Buses</Text>
+        <Text className="text-gray-600">
+          {depart} → {arrive} on {new Date(date as string).toLocaleDateString()}
+        </Text>
+      </View>
+
+      {/* Bus Cards */}
+      <ScrollView className="space-y-4">
+        {trips.length > 0 ? (
+          trips.map((trip) => (
+            <View
+              key={trip.id}
+              className="bg-white p-4 rounded-lg shadow-md"
+            >
+              {/* Bus Details */}
+              <Text className="text-lg font-semibold text-gray-800">
+                Bus: {trip.bus.bus_number}
+              </Text>
+              <Text className="text-gray-600">
+                {trip.depart.location} → {trip.destination.location}
+              </Text>
+              <Text className="text-gray-600">
+                Time: {new Date(trip.schedule).toLocaleTimeString()}
+              </Text>
+              <Text className="text-gray-600">
+                Fare: ₹{trip.fare} / Seat
+              </Text>
+
+              {/* Bus Type */}
+              <View className="mt-2">
+                <Text className="text-gray-800 font-medium">
+                  Type: {trip.bus.category.name}
+                </Text>
+                <Text className="text-gray-600">
+                  {trip.bus.category.description}
+                </Text>
+              </View>
+
+              {/* Booking Button */}
+              <TouchableOpacity
+                className="mt-4 bg-red-600 rounded-lg py-2"
+                onPress={() => {
+                  // Placeholder for booking logic
+                  console.log("Booking trip:", trip.id);
+                }}
+              >
+                <Text className="text-white text-center font-bold">
+                  Book Now
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ))
+        ) : (
+          <Text className="text-gray-500 text-center mt-10">
+            No buses available.
+          </Text>
+        )}
+      </ScrollView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 10,
-  },
-  trip: {
-    padding: 10,
-    marginTop: 10,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-  },
-});

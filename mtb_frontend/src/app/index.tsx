@@ -43,7 +43,6 @@ const SearchCard = () => {
     router.push({
       pathname: "/buses",
       params: {
-        api,
         depart: departureLocation,
         arrive: arrivalLocation,
         date: formattedDate,
@@ -53,6 +52,7 @@ const SearchCard = () => {
 
   return (
     <ScrollView>
+      <Text className="text-3xl font-bold pt-5 text-red-600 text-center">My Town Bus</Text>
       <View style={styles.container}>
         {/* Departure Picker */}
         <View style={styles.inputContainer}>
@@ -81,12 +81,12 @@ const SearchCard = () => {
         </View>
 
         {/* API Input */}
-        <TextInput
+        {/* <TextInput
           style={styles.input}
           placeholder="Enter API URL"
           onChangeText={setApi}
-          value={api}
-        />
+          value={api} */}
+        {/* /> */}
 
         {/* Date Picker */}
         <TouchableOpacity onPress={() => setShowPicker(true)} style={styles.dateContainer}>
