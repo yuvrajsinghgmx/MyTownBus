@@ -16,6 +16,11 @@ from rest_framework import status
 from .models import Schedule
 from .serializers import ScheduleSerializer
 from django.utils.dateparse import parse_datetime
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authtoken.models import Token
+from rest_framework import status
+
+
 
 class FindScheduledTripsView(APIView):
     def get(self, request):
@@ -103,3 +108,21 @@ class LoginView(APIView):
             token, created = Token.objects.get_or_create(user=user)
             return Response({'token': token.key}, status=status.HTTP_200_OK)
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Get details of the logged-in user."""
+        user = request.user
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request):
+        """Edit details of the logged-in user."""
+        user = request.user
+        serializer = UserSerializer(user, data=request.data, partial=True)  # partial=True allows partial updates
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'User details updated successfully'}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
