@@ -38,17 +38,18 @@ class BookingSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'password', 'name', 'age', 'gender', 'phone', 'address']
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ['id', 'username', 'name', 'age', 'gender', 'phone', 'address']
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
 
-    def create(self, validated_data):
-        user = User.objects.create_user(
-            username=validated_data['username'],
-            password=validated_data['password'],
-            name=validated_data['name'],
-            age=validated_data.get('age'),
-            gender=validated_data.get('gender'),
-            phone=validated_data['phone'],
-            address=validated_data.get('address'),
-        )
-        return user
+    def update(self, instance, validated_data):
+        """Update user instance."""
+        instance.username = validated_data.get('username', instance.username)
+        instance.name = validated_data.get('name', instance.name)
+        instance.age = validated_data.get('age', instance.age)
+        instance.gender = validated_data.get('gender', instance.gender)
+        instance.phone = validated_data.get('phone', instance.phone)
+        instance.address = validated_data.get('address', instance.address)
+        instance.save()
+        return instance

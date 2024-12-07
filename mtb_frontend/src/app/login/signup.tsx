@@ -7,7 +7,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { router } from "expo-router";
 
-const API_BASE_URL = "http://10.21.121.59:8000/api";
+const API_BASE_URL = "http://192.168.1.75:8000/api";
 
 const LoginSignupScreen: React.FC = () => {
   const [username, setUsername] = useState<string>("");
@@ -20,15 +20,15 @@ const LoginSignupScreen: React.FC = () => {
   const [password, setPassword] = useState<string>("");
   const [hasReferralCode, setHasReferralCode] = useState<boolean>(false);
 
-  useEffect(() => {
-    const checkSession = async () => {
-      const token = await AsyncStorage.getItem("authToken");
-      if (token) {
-        router.push("./profilescreen");
-      }
-    };
-    checkSession();
-  }, []);
+  // useEffect(() => {
+  //   const checkSession = async () => {
+  //     const token = await AsyncStorage.getItem("authToken");
+  //     if (token) {
+  //       router.push("./profilescreen");
+  //     }
+  //   };
+  //   checkSession();
+  // }, []);
 
   const handleLogin = async () => {
     try {

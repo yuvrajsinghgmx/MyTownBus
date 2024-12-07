@@ -109,20 +109,31 @@ class LoginView(APIView):
             return Response({'token': token.key}, status=status.HTTP_200_OK)
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
     
-    class UserProfileView(APIView):
+class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        """Get details of the logged-in user."""
-        user = request.user
-        serializer = UserSerializer(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+def get(self, request):
+    """Get details of the logged-in user."""
+    user = request.user
+    serializer = UserSerializer(user)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def put(self, request):
-        """Edit details of the logged-in user."""
-        user = request.user
-        serializer = UserSerializer(user, data=request.data, partial=True)  # partial=True allows partial updates
-        if serializer.is_valid():
-            serializer.save()
-            return Response({'message': 'User details updated successfully'}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+def put(self, request):
+    """Edit details of the logged-in user."""
+    user = request.user
+    serializer = UserSerializer(user, data=request.data, partial=True)  # partial=True allows partial updates
+    if serializer.is_valid():
+        serializer.save()
+        return Response({'message': 'User details updated successfully'}, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        """Log out the user by deleting their token."""
+        try:
+            request.user.auth_token.delete()
+            return Response({'message': 'Logged out successfully'}, status=status.HTTP_200_OK)
+        except Token.DoesNotExist:
+            return Response({'error': 'Token not found'}, status=status.HTTP_400_BAD_REQUEST)

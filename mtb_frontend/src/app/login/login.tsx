@@ -6,9 +6,13 @@ import Checkbox from "../../components/Checkbox";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { router } from "expo-router";
+import Global from "../../api/api";
+import * as Keychain from 'react-native-keychain';
 
 
-const API_BASE_URL = "http://10.21.121.59:8000/api";
+
+const API_BASE_URL = "http://192.168.1.75:8000/api";
+
 
 const LoginSignupScreen: React.FC = () => {
   const [name, setName] = useState<string>("");
@@ -16,15 +20,16 @@ const LoginSignupScreen: React.FC = () => {
   const [password, setPassword] = useState<string>("");
   const [hasReferralCode, setHasReferralCode] = useState<boolean>(false);
 
-  useEffect(() => {
-    const checkSession = async () => {
-      const token = await AsyncStorage.getItem("authToken");
-      if (token) {
-        router.push("./profilescreen");
-      }
-    };
-    checkSession();
-  }, []);
+  // useEffect(() => {
+  //   const checkSession = async () => {
+  //     const token = await AsyncStorage.getItem("authToken");
+  //     if (token) {
+  //       console.log(`${token}`)
+  //       router.push("./profilescreen");
+  //     }
+  //   };
+  //   checkSession();
+  // }, []);
 
   const handleLogin = async () => {
     try {
@@ -33,7 +38,9 @@ const LoginSignupScreen: React.FC = () => {
 
       await AsyncStorage.setItem("authToken", token);
       await AsyncStorage.setItem("userName", username);
-
+      Global.token=token; 
+    
+      // saveToken(username,token);
       router.push("./profilescreen");
     } catch (error) {
       Alert.alert("Login Failed", "Invalid credentials. Please try again.");
@@ -62,10 +69,9 @@ const LoginSignupScreen: React.FC = () => {
       console.error(error);
     }
   };
-
+  const token =  AsyncStorage.getItem("authToken");
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
       <InputField
         label="Name"
         placeholder="Enter Your Name"

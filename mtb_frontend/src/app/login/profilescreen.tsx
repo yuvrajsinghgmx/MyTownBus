@@ -12,6 +12,7 @@ import { auth } from "../../components/firebase/firebaseConfig";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from "expo-router";
 import Profile from "../profile";
+import Global from "../../api/api";
 
 const ProfileScreen: React.FC = () => {
   const [name, setName] = useState<string>("");
@@ -85,16 +86,28 @@ const ProfileScreen: React.FC = () => {
   };
   const handleLogout = async () => {
     try {
-      await signOut(auth);
-      await AsyncStorage.removeItem("userEmail");
-      await AsyncStorage.removeItem("userDisplayName");
-      Alert.alert("Logged out", "You have been logged out.");
+      const token = await AsyncStorage.getItem("authToken"); 
+      const response = await fetch("http://192.168.1.75:8000/api/logout/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
+        },
+      });
+        if (response.ok) {
+        await AsyncStorage.multiRemove(["userName", "authToken"]);
+        Global.token = (null);
+        Alert.alert("Logged out", "You have been successfully logged out.");
+       router.replace("./login");
+      } else {
+        const errorData = await response.json();
+        Alert.alert("Logout Failed", errorData.message || "Unable to log out.");
+      }
     } catch (error) {
       Alert.alert("Error", "Could not log out. Please try again.");
+      console.error("Logout error:", error);
     }
-    router.push('../profile')
   };
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Profile</Text>

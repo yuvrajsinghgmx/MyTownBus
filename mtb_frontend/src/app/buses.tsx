@@ -4,6 +4,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useLocalSearchParams } from "expo-router";
 import axios from "axios";
 
+
 interface Location {
   id: number;
   location: string;

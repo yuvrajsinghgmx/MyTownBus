@@ -1,15 +1,17 @@
 import React, { useState } from "react";
-import { Text, View, StyleSheet, Image, ScrollView, Alert, Modal, TextInput, Button } from "react-native";
+import { Text, View, StyleSheet, Image, ScrollView, Alert, Modal, TextInput, Button, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, router } from "expo-router";
 import ProfileOption from "../components/ProfileOption";
 import { auth } from "../components/firebase/firebaseConfig";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Global from "../api/api";
 
 export default function Profile() {
+  const token = AsyncStorage.getItem("authToken")
   const [isModalVisible, setModalVisible] = useState(false);
   const [password, setPassword] = useState("");
   const name = auth.currentUser?.displayName ?? "Login to avail offers and more";
-  const nav = auth.currentUser ? "./login/profilescreen" : "./login/login";
 
   const handlePasswordSubmit = () => {
     if (password === "owner_password") {
@@ -23,7 +25,12 @@ export default function Profile() {
   return (
     
     <ScrollView style={styles.container}>
-      <Link href={nav}>
+      <TouchableOpacity  onPress={()=>{ if (Global.token) {
+        router.push("./login/profilescreen")
+      } else {
+        router.push("./login/login")
+      }} } >
+
         <View style={styles.userInfoContainer}>
           <Image
             source={{
@@ -36,7 +43,7 @@ export default function Profile() {
             <Ionicons name="chevron-forward-outline" size={24} color="gray" />
           </View>
         </View>
-      </Link>
+        </TouchableOpacity>
 
       {/* Profile options */}
       <ProfileOption
