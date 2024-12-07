@@ -7,6 +7,7 @@ import Checkbox from "../../components/Checkbox";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { router } from "expo-router";
+import Global from "../../api/api";
 
 const API_BASE_URL = "http://192.168.1.75:8000/api";
 
@@ -23,7 +24,7 @@ const LoginSignupScreen: React.FC = () => {
     }
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/login/`, {
+      const response = await axios.post(`${Global.api}/login/`, {
         username,
         password,
         name,

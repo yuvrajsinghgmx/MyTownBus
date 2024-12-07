@@ -1,247 +1,258 @@
-    import React, { useState } from "react";
-    import {
-    View,
-    Text,
-    TextInput,
-    Alert,
-    TouchableOpacity,
-    StyleSheet,
-    } from "react-native";
-    import AsyncStorage from '@react-native-async-storage/async-storage';
-    import { useFocusEffect } from '@react-navigation/native';
-    import { router } from "expo-router";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect, useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-    const ProfileScreen: React.FC = () => {
-    const [name, setName] = useState<string>("");
-    const [email, setEmail] = useState<string>("");
-    const [phone, setPhone] = useState<string>("");
-    const [editMode, setEditMode] = useState<boolean>(false);
+const ProfileScreen = () => {
+  const router = useRouter();
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("MyTownBus");
+  const [phone, setPhone] = useState<string>("12345678");
+  const [editMode, setEditMode] = useState<boolean>(false);
+  const [age, setAge] = useState<string>("00");
 
-    useFocusEffect(
+  useFocusEffect(
     React.useCallback(() => {
-    const fetchUserData = async () => {
-      const token = await AsyncStorage.getItem("authToken");
+      const fetchUserData = async () => {
+        try {
+          const token = await AsyncStorage.getItem("authToken");
+          if (!token) {
+            Alert.alert("Not logged in", "Please log in to access this page.");
+            router.replace("./login");
+            return;
+          }
 
+          const response = await fetch("http://192.168.1.75:8000/api/profile/", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Token ${token}`,
+            },
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            setName(data.name || "");
+            setEmail(data.username || "");
+            setPhone(data.phone || "");
+            setAge(data.age || "00");
+          } else {
+            Alert.alert("Error", "Failed to fetch user data.");
+          }
+        } catch (error) {
+          Alert.alert("Error", "Could not fetch user data.");
+          console.error("Fetch error:", error);
+        }
+      };
+
+      fetchUserData();
+    }, [router])
+  );
+
+  const handleSave = async () => {
+    if (!name.trim() || !phone.trim()) {
+      Alert.alert("Validation Error", "Name and phone fields are required!");
+      return;
+    }
+
+    try {
+      const token = await AsyncStorage.getItem("authToken");
       if (!token) {
-        Alert.alert("Not logged in", "Please log in to access this page.");
+        Alert.alert("Error", "User is not logged in.");
         return;
       }
 
-      try {
-        const response = await fetch("http://192.168.1.75:8000/api/profile/", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Token ${token}`,
-          },
-        });
+      const response = await fetch("http://192.168.1.75:8000/api/profile/", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
+        },
+        body: JSON.stringify({ name, phone }),
+      });
 
-        if (response.ok) {
-          const data = await response.json();
-          setName(data.name || "");
-          setEmail(data.username || "");
-          setPhone(data.phone || "");
-        } else {
-          Alert.alert("Error", "Failed to fetch user data.");
-        }
-      } catch (error) {
-        Alert.alert("Error", "Could not fetch user data.");
-        console.error("Fetch error:", error);
+      if (response.ok) {
+        Alert.alert("Success", "Your details have been updated!");
+        setEditMode(false);
+      } else {
+        const errorData = await response.json();
+        Alert.alert("Error", errorData.message || "Failed to update details.");
       }
-    };
-
-    fetchUserData();
-    }, []) 
-    );
-    const handleSave = async () => {
-    if (!name.trim() || !email.trim() || !phone.trim()) {
-    Alert.alert("Validation Error", "All fields are required!");
-    return;
-    }
-
-    const token = await AsyncStorage.getItem("authToken");
-
-    if (!token) {
-    Alert.alert("Error", "User is not logged in.");
-    return;
-    }
-
-    try {
-    const response = await fetch("http://192.168.1.75:8000/api/profile/", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Token ${token}`,
-      },
-      body: JSON.stringify({
-        name :name,
-        phone :phone,
-      }),
-    });
-
-    if (response.ok) {
-      Alert.alert("Success", "Your details have been updated!");
-      setEditMode(false);
-    } else {
-      const errorData = await response.json();
-      Alert.alert("Error", errorData.message || "Failed to update details.");
-    }
     } catch (error) {
-    Alert.alert("Error", "Could not save user data.");
-    console.error("Save error:", error);
+      Alert.alert("Error", "Could not save user data.");
+      console.error("Save error:", error);
     }
-    };
+  };
 
-    const handleLogout = async () => {
-    try {
-    const token = await AsyncStorage.getItem("authToken"); 
-    const response = await fetch("http://192.168.1.75:8000/api/logout/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Token ${token}`,
-      },
-    });
-
-    if (response.ok) {
-      await AsyncStorage.multiRemove(["authToken"]);
-      Alert.alert("Logged out", "You have been successfully logged out.");
-      router.replace("./login");
+  const toggleEditMode = () => {
+    if (editMode) {
+      handleSave();
     } else {
-      const errorData = await response.json();
-      Alert.alert("Logout Failed", errorData.message || "Unable to log out.");
+      setEditMode(true);
     }
+  };
+
+  const handleLogout = async () => {
+    try {
+      const token = await AsyncStorage.getItem("authToken");
+      const response = await fetch("http://192.168.1.75:8000/api/logout/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        await AsyncStorage.multiRemove(["authToken"]);
+        Alert.alert("Logged out", "You have been successfully logged out.");
+        router.replace("./login");
+      } else {
+        const errorData = await response.json();
+        Alert.alert("Logout Failed", errorData.message || "Unable to log out.");
+      }
     } catch (error) {
-    Alert.alert("Error", "Could not log out. Please try again.");
-    console.error("Logout error:", error);
+      Alert.alert("Error", "Could not log out. Please try again.");
+      console.error("Logout error:", error);
     }
-    };
+  };
 
-    return (
-    <View style={styles.container}>
-    <Text style={styles.title}>Profile</Text>
-
-    <View style={styles.profileContainer}>
-      <Text style={styles.label}>Name</Text>
-      <TextInput
-        style={editMode ? styles.input : styles.inputDisabled}
-        editable={editMode}
-        placeholder="Enter your name"
-        value={name}
-        onChangeText={setName}
-      />
-    </View>
-
-    <View style={styles.profileContainer}>
-      <Text style={styles.label}>Email</Text>
-      <TextInput
-        style={editMode ? styles.input : styles.inputDisabled}
-        editable={editMode}
-        placeholder="Enter your email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-      />
-    </View>
-
-    <View style={styles.profileContainer}>
-      <Text style={styles.label}>Phone</Text>
-      <TextInput
-        style={editMode ? styles.input : styles.inputDisabled}
-        editable={editMode}
-        placeholder="Enter your phone number"
-        value={phone}
-        onChangeText={setPhone}
-        keyboardType="phone-pad"
-      />
-    </View>
-
-    {editMode ? (
-      <TouchableOpacity
-        style={[
-          styles.saveButton,
-          (!name || !email || !phone) && styles.disabledButton,
-        ]}
-        onPress={handleSave}
-        disabled={!name || !email || !phone}
+  return (
+    <SafeAreaView className="flex-1 bg-white">
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 20 }}
+        showsVerticalScrollIndicator={true}
+        className="p-4"
       >
-        <Text style={styles.buttonText}>Save</Text>
-      </TouchableOpacity>
-    ) : (
-      <TouchableOpacity style={styles.editButton} onPress={() => setEditMode(true)}>
-        <Text style={styles.buttonText}>Edit</Text>
-      </TouchableOpacity>
-    )}
+        {/* Header */}
+        <View className="flex-row items-center justify-between">
+          <Text className="text-xl font-bold text-gray-800">My Account</Text>
+          <TouchableOpacity
+            onPress={toggleEditMode}
+            className="bg-red-500 px-4 py-2 rounded-full"
+          >
+            <Text className="text-white font-semibold">
+              {editMode ? "Save" : "Edit"}
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-    <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-      <Text style={styles.buttonText}>Logout</Text>
-    </TouchableOpacity>
-    </View>
-    );
-    };
+        {/* Profile Information */}
+        <View className="mt-6 bg-gray-100 p-4 rounded-lg shadow-sm">
+          {/* Full Name */}
+          <View className="mb-4">
+            <Text className="text-gray-700 font-medium">Full Name</Text>
+            <TextInput
+              className={`${
+                editMode
+                  ? "border border-gray-400"
+                  : "border border-transparent"
+              } mt-1 p-2 rounded-lg bg-white`}
+              editable={editMode}
+              placeholder="Enter your name"
+              value={name}
+              onChangeText={setName}
+            />
+          </View>
 
-    const styles = StyleSheet.create({
-    container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-    padding: 20,
-    },
-    title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
-    },
-    profileContainer: {
-    marginBottom: 20,
-    },
-    label: {
-    fontSize: 16,
-    fontWeight: "500",
-    marginBottom: 5,
-    },
-    input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 10,
-    borderRadius: 8,
-    backgroundColor: "#fff",
-    },
-    inputDisabled: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    padding: 10,
-    borderRadius: 8,
-    backgroundColor: "#f0f0f0",
-    color: "#888",
-    },
-    saveButton: {
-    backgroundColor: "#4CAF50",
-    padding: 15,
-    borderRadius: 8,
-    marginTop: 10,
-    },
-    editButton: {
-    backgroundColor: "#007BFF",
-    padding: 15,
-    borderRadius: 8,
-    marginTop: 10,
-    },
-    logoutButton: {
-    backgroundColor: "#FF3B30",
-    padding: 15,
-    borderRadius: 8,
-    marginTop: 20,
-    },
-    disabledButton: {
-    backgroundColor: "#cccccc",
-    },
-    buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    textAlign: "center",
-    fontWeight: "bold",
-    },
-    });
+          {/* Birth Date (Static) */}
+          <View className="mb-4">
+            <Text className="text-gray-700 font-medium">Birth Date</Text>
+            <TextInput
+              className="mt-1 p-2 rounded-lg bg-gray-200 text-gray-600 border border-transparent"
+              editable={false}
+              placeholder="Select birth date"
+              value="Not Available"
+            />
+          </View>
 
-    export default ProfileScreen;
+          {/* Gender (Static Options) */}
+          <View className="mb-4 ">
+            <Text className="text-gray-700 font-medium">Gender</Text>
+            <View className="flex-row mt-2  space-x-4">
+              <TouchableOpacity className="flex-1 bg-gray-200 p-2 m-2 rounded-lg items-center">
+                <Text className="text-gray-600">Male</Text>
+              </TouchableOpacity>
+              <TouchableOpacity className="flex-1 bg-gray-200 p-2 m-2 rounded-lg items-center">
+                <Text className="text-gray-600">Female</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Phone */}
+          <View className="mb-4">
+            <Text className="text-gray-700 font-medium">Mobile</Text>
+            <TextInput
+              className={`${
+                editMode
+                  ? "border border-gray-400"
+                  : "border border-transparent"
+              } mt-1 p-2 rounded-lg bg-white`}
+              editable={editMode}
+              placeholder="Enter your phone number"
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
+            />
+          </View>
+
+          {/* Email (Static) */}
+          <View className="mb-4">
+            <Text className="text-gray-700 font-medium">User Name</Text>
+            <TextInput
+              className="mt-1 p-2 rounded-lg bg-gray-200 text-gray-600 border border-transparent"
+              editable={false}
+              value={email}
+            />
+          </View>
+
+          {/* Age */}
+          <View className="mb-4">
+            <Text className="text-gray-700 font-medium">Age</Text>
+            <TextInput
+              className="mt-1 p-2 rounded-lg bg-gray-200 text-gray-600 border border-transparent"
+              editable={false}
+              value={age}
+            />
+          </View>
+        </View>
+
+        {/* Other Options */}
+        <View className="mt-6">
+          {[
+            { title: "Traveller Details" },
+            { title: "Saved Cards" },
+            { title: "Billing Address" },
+            { title: "UPI Payment/Instant Refund" },
+          ].map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              className="flex-row items-center justify-between p-4 bg-gray-50 border-b border-gray-200"
+            >
+              <Text className="text-gray-700">{item.title}</Text>
+              <Text className="text-gray-400">{">"}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Sign Out */}
+        <TouchableOpacity
+          className="bg-red-500 mt-6 py-3 rounded-lg"
+          onPress={handleLogout}
+        >
+          <Text className="text-center text-white font-semibold">Sign Out</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
+
+export default ProfileScreen;
