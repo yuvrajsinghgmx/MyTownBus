@@ -5,14 +5,23 @@ import { Link, router } from "expo-router";
 import ProfileOption from "../components/ProfileOption";
 import { auth } from "../components/firebase/firebaseConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Global from "../api/api";
+
 
 export default function Profile() {
-  const token = AsyncStorage.getItem("authToken")
+  const [token, setToken] = useState<string | null>(null);
   const [isModalVisible, setModalVisible] = useState(false);
   const [password, setPassword] = useState("");
   const name = auth.currentUser?.displayName ?? "Login to avail offers and more";
-
+  const fetchToken = async () => {
+    try {
+      const storedToken = await AsyncStorage.getItem("authToken");
+      setToken(storedToken);
+      return storedToken;
+    } catch (error) {
+      console.error("Error fetching token:", error);
+      return null;
+    }
+  };
   const handlePasswordSubmit = () => {
     if (password === "owner_password") {
       setModalVisible(false);
@@ -25,7 +34,9 @@ export default function Profile() {
   return (
     
     <ScrollView style={styles.container}>
-      <TouchableOpacity  onPress={()=>{ if (Global.token) {
+      <TouchableOpacity  onPress={async()=>{ 
+      const fetchedToken = await fetchToken();  
+      if (fetchedToken) {
         router.push("./login/profilescreen")
       } else {
         router.push("./login/login")

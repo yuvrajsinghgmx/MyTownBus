@@ -12,7 +12,6 @@ import { auth } from "../../components/firebase/firebaseConfig";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from "expo-router";
 import Profile from "../profile";
-import Global from "../../api/api";
 
 const ProfileScreen: React.FC = () => {
   const [name, setName] = useState<string>("");
@@ -96,7 +95,7 @@ const ProfileScreen: React.FC = () => {
       });
         if (response.ok) {
         await AsyncStorage.multiRemove(["userName", "authToken"]);
-        Global.token = (null);
+        // Global.token = (null);
         Alert.alert("Logged out", "You have been successfully logged out.");
        router.replace("./login");
       } else {
