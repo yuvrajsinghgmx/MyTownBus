@@ -1,6 +1,6 @@
 
 from rest_framework import serializers
-from .models import Category, Location, Bus, Schedule, Booking,User 
+from .models import Category, Location, Bus, Schedule, Booking,User , Seat
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -27,12 +27,12 @@ class ScheduleSerializer(serializers.ModelSerializer):
         model = Schedule
         fields = ['id', 'code', 'bus', 'depart', 'destination', 'schedule', 'fare', 'status', 'date_created', 'date_updated']
 
-class BookingSerializer(serializers.ModelSerializer):
-    schedule = ScheduleSerializer()
+# class BookingSerializer(serializers.ModelSerializer):
+#     schedule = ScheduleSerializer()
 
-    class Meta:
-        model = Booking
-        fields = ['id', 'code', 'name', 'schedule', 'seats', 'status', 'date_created', 'date_updated']
+#     class Meta:
+#         model = Booking
+#         fields = ['id', 'code', 'name', 'schedule', 'seats', 'status', 'date_created', 'date_updated']
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -53,3 +53,25 @@ class UserSerializer(serializers.ModelSerializer):
         instance.address = validated_data.get('address', instance.address)
         instance.save()
         return instance
+    
+class SeatSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Seat
+        fields = ['id', 'schedule_id', 'seat_number', 'status', 'date_created', 'date_updated']
+
+class BookingSerializer(serializers.ModelSerializer):
+    seats = SeatSerializer(many=True)
+
+    class Meta:
+        model = Booking
+        fields = ['id', 'code', 'name', 'schedule', 'seats', 'status', 'payment_reference', 'date_created', 'date_updated']
+
+    def create(self, validated_data):
+        seats_data = validated_data.pop('seats')
+        booking = Booking.objects.create(**validated_data)
+        for seat_data in seats_data:
+            seat = Seat.objects.get(id=seat_data['id'])
+            seat.status = '3'  # Mark as booked
+            seat.save()
+            booking.seats.add(seat)
+        return booking

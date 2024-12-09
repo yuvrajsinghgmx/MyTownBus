@@ -65,18 +65,44 @@ class Schedule(models.Model):
         booked = Booking.objects.filter(schedule=self).aggregate(Sum('seats'))['seats__sum']
         return self.bus.seats - booked
 
-class Booking(models.Model):
-    code = models.CharField(max_length=100)
-    name = models.CharField(max_length=250)
-    schedule = models.ForeignKey(Schedule,on_delete=models.CASCADE)
-    seats = models.IntegerField()
-    status = models.CharField(max_length=2, choices=(('1','Pending'),('2','Paid')), default=1)
+class Seat(models.Model):
+    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
+    seat_number = models.CharField(max_length=10)
+    status = models.CharField(
+        max_length=2,
+        choices=[('1', 'Available'), ('2', 'Reserved'), ('3', 'Booked')],
+        default='1'
+    )   
     date_created = models.DateTimeField(default=timezone.now)
     date_updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return str(self.code + ' - ' + self.name)
+        return f"{self.schedule} - Seat {self.seat_number}"
+
+
+
+class Booking(models.Model):
+    code = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=250)
+    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
+    seats = models.ManyToManyField(Seat)
+    status = models.CharField(
+        max_length=2,
+        choices=(('1', 'Pending'), ('2', 'Paid')),
+        default='1'
+    )
+    payment_reference = models.CharField(max_length=100, null=True, blank=True)
+    date_created = models.DateTimeField(default=timezone.now)
+    date_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"
 
     def total_payable(self):
-        return self.seats * self.schedule.fare
+        return self.seats.count() * self.schedule.fare
+
+    def finalize_booking(self):
+        if self.status == '2':
+            self.seats.update(status='3')
+
 

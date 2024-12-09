@@ -1,6 +1,6 @@
 # urls.py
 from django.urls import path
-from .views import FindScheduledTripsView ,SignupView ,LoginView,UserProfileView,LogoutView
+from .views import FindScheduledTripsView ,SignupView ,LoginView,UserProfileView,LogoutView,AvailableSeatsView,BookSeatsView,ConfirmBookingView
 from . import views
 
 
@@ -29,4 +29,7 @@ urlpatterns = [
     path('api/login/', LoginView.as_view(), name='login'),
     path('api/profile/', UserProfileView.as_view(), name='user-profile'),
     path('api/logout/', LogoutView.as_view(), name='logout'),
+    path('seats/<int:schedule_id>/available/', AvailableSeatsView.as_view(), name='available-seats'),
+    path('seats/book/', BookSeatsView.as_view(), name='book-seats'),
+    path('booking/<int:booking_id>/confirm/', ConfirmBookingView.as_view(), name='confirm-booking'),
 ]

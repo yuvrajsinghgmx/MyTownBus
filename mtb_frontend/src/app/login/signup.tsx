@@ -6,6 +6,7 @@ import Checkbox from "../../components/Checkbox";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { router } from "expo-router";
+import Global from "../../api/api";
 
 const API_BASE_URL = "http://192.168.1.75:8000/api";
 
@@ -20,21 +21,10 @@ const LoginSignupScreen: React.FC = () => {
   const [password, setPassword] = useState<string>("");
   const [hasReferralCode, setHasReferralCode] = useState<boolean>(false);
 
-  // useEffect(() => {
-  //   const checkSession = async () => {
-  //     const token = await AsyncStorage.getItem("authToken");
-  //     if (token) {
-  //       router.push("./profilescreen");
-  //     }
-  //   };
-  //   checkSession();
-  // }, []);
-
   const handleLogin = async () => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/login/`, { username, password,name });
+      const response = await axios.post(`${API_BASE_URL}/login/`, {username : username, password: password,name :name });
       const { token } = response.data;
-
       await AsyncStorage.setItem("authToken", token);
       await AsyncStorage.setItem("userName", username);
       Alert.alert("User Created SucessFully")
@@ -47,20 +37,27 @@ const LoginSignupScreen: React.FC = () => {
 
   const handleSignup = async () => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/signup/`, { username, password ,name,age,gender,phone,address});
-      // const { token } = response.data;
-
-      // await AsyncStorage.setItem("authToken", token);
-      // await AsyncStorage.setItem("userName", username);
-      handleLogin();
-
-      // router.push("./profilescreen");
+      const response = await axios.post(`${Global.api}/signup/`, {
+        username,
+        password,
+        name,
+        age,
+        gender,
+        phone,
+        address,
+      });
+        if (response.status === 201) {
+        Alert.alert("Signup Successful", "Your account has been created.");
+        console.log("Password:",username, password ,name);
+        handleLogin();
+      } else {
+        Alert.alert("Signup Failed", "Unable to register. Please try again.");
+      }
     } catch (error) {
       Alert.alert("Signup Failed", "Unable to register. Please try again.");
-      console.error(error);
+      console.error("Signup error:", error);
     }
   };
-
 
   return (
     <ScrollView style={styles.container}>

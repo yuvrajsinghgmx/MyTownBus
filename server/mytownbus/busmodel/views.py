@@ -1,9 +1,10 @@
 # views.py
+import random
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from rest_framework import generics
-from .models import Category, Location, Bus, Schedule, Booking , User
-from .serializers import CategorySerializer, LocationSerializer, BusSerializer, ScheduleSerializer, BookingSerializer ,UserSerializer
+from .models import Category, Location, Bus, Schedule, Booking , User , Seat
+from .serializers import CategorySerializer, LocationSerializer, BusSerializer, ScheduleSerializer, BookingSerializer ,UserSerializer , SeatSerializer
 # views.py
 from rest_framework import generics
 from rest_framework.response import Response
@@ -135,3 +136,49 @@ class LogoutView(APIView):
             return Response({'message': 'Logged out successfully'}, status=status.HTTP_200_OK)
         except Token.DoesNotExist:
             return Response({'error': 'Token not found'}, status=status.HTTP_400_BAD_REQUEST)
+        
+class AvailableSeatsView(APIView):
+    def get(self, request, schedule_id):
+        seats = Seat.objects.filter(schedule_id=schedule_id)
+        serializer = SeatSerializer(seats, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class BookSeatsView(APIView):
+    def post(self, request):
+        schedule_id = request.data.get('schedule_id')
+        seat_ids = request.data # '1' for available.get('seat_ids', [])
+        name = request.data.get('name')
+
+        # Fetch available seats
+        seats = Seat.objects.filter(id__in=seat_ids, schedule_id=schedule_id, status='1')
+
+        if seats.count() != len(seat_ids):
+            return Response({"error": "Some seats are already booked or unavailable."}, status=status.HTTP_400_BAD_REQUEST)
+        seats.update(status='2')
+        booking = Booking.objects.create(
+            code=f"BOOK-{random.randint(1000, 9999)}",
+            name=name,
+            schedule_id=schedule_id,
+            status='1'
+        )
+        booking.seats.set(seats)
+        booking.save()
+
+        return Response({
+            "message": "Booking created successfully.",
+            "booking_id": booking.id,
+            "total_fare": booking.total_payable()
+        }, status=status.HTTP_201_CREATED)
+
+class ConfirmBookingView(APIView):
+    def post(self, request, booking_id):
+        try:
+            booking = Booking.objects.get(id=booking_id, status='1')  # Pending payment
+            booking.status = '2'  # '2' for paid
+            booking.payment_reference = request.data.get('payment_reference', 'N/A')
+            booking.finalize_booking()  # Mark seats as booked
+            booking.save()
+
+            return Response({"message": "Booking confirmed successfully."}, status=status.HTTP_200_OK)
+        except Booking.DoesNotExist:
+            return Response({"error": "Booking not found or already confirmed."}, status=status.HTTP_404_NOT_FOUND)

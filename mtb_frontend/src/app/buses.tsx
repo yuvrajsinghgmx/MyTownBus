@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import axios from "axios";
 
 
@@ -102,6 +102,12 @@ export default function Buses() {
               <TouchableOpacity
                 className="mt-4 bg-red-600 rounded-lg py-2"
                 onPress={() => {
+                  router.push({
+                    pathname : "./booking/SeatSelection",
+                    params : {
+                      scheduleId : trip.id,
+                    }
+                  })
                   console.log("Booking trip:", trip.id);
                 }}
               >
