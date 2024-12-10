@@ -31,5 +31,5 @@ urlpatterns = [
     path('api/logout/', LogoutView.as_view(), name='logout'),
     path('seats/<int:schedule_id>/available/', AvailableSeatsView.as_view(), name='available-seats'),
     path('seats/book/', BookSeatsView.as_view(), name='book-seats'),
-    path('booking/<int:booking_id>/confirm/', ConfirmBookingView.as_view(), name='confirm-booking'),
+    path('booking/<str:booking_id>/confirm/', ConfirmBookingView.as_view(), name='confirm-booking'),
 ]

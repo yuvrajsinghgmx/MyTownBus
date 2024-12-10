@@ -86,6 +86,7 @@ class Booking(models.Model):
     name = models.CharField(max_length=250)
     schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE)
     seats = models.ManyToManyField(Seat)
+    seat_numbers = models.JSONField(default=list)
     status = models.CharField(
         max_length=2,
         choices=(('1', 'Pending'), ('2', 'Paid')),

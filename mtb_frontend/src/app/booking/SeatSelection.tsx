@@ -12,7 +12,7 @@ interface Seat {
 const SeatSelection = () => {
   const { scheduleId } = useLocalSearchParams();
   const [seats, setSeats] = useState<Seat[]>([]);
-  const [selectedSeats, setSelectedSeats] = useState<string[]>([]); // Use string for seat_number
+  const [selectedSeats, setSelectedSeats] = useState<string[]>([]); 
 
   useEffect(() => {
     const fetchSeats = async () => {

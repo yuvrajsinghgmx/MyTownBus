@@ -23,7 +23,7 @@ class ScheduleAdmin(admin.ModelAdmin):
     search_fields = ['code', 'bus__bus_number', 'depart__location', 'destination__location']
 
 class BookingAdmin(admin.ModelAdmin):
-    list_display = ['id', 'code', 'name', 'schedule', 'get_seats', 'status', 'date_created']
+    list_display = ['id', 'code', 'seat_numbers','name', 'schedule','status', 'date_created']
 
     def get_seats(self, obj):
         return ", ".join([seat.seat_number for seat in obj.seats.all()])

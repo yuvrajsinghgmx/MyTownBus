@@ -160,13 +160,17 @@ class BookSeatsView(APIView):
                 if seats.count() != len(seat_numbers):
                     return Response({"error": "Some seats are already booked or unavailable."}, status=status.HTTP_400_BAD_REQUEST)
                 seats.update(status='2')
+                print(seats)
+                print(seat_numbers)
+                print(schedule_id)
                 booking = Booking.objects.create(
                     code=f"BOOK-{random.randint(1000, 9999)}",
                     name=name,
                     schedule_id=schedule_id,
-                    status='1'
+                    status='1',
+                    seat_numbers = seat_numbers,
                 )
-                booking.seats.set(seats)
+                booking.seats.add(*seats)
                 booking.save()
                 return Response({
                     "message": "Seats successfully booked!",
@@ -180,7 +184,7 @@ class BookSeatsView(APIView):
 class ConfirmBookingView(APIView):
     def post(self, request, booking_id):
         try:
-            booking = Booking.objects.get(id=booking_id, status='1')  # Pending payment
+            booking = Booking.objects.get(code=booking_id, status='1')
             booking.status = '2'
             booking.payment_reference = request.data.get('payment_reference', 'N/A')
             booking.finalize_booking()

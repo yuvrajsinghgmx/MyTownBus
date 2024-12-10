@@ -12,7 +12,7 @@ const ConfirmBooking = () => {
   const confirmBooking = async () => {
     try { 
       const response = await axios.post(
-        `http://192.168.1.75:8000/booking/BOOK-8370/confirm/,`,
+        `http://192.168.1.75:8000/booking/${bookingId}/confirm/`,
         { payment_reference: paymentReference }
       );
       console.log("Booking confirmed:", response.data);
