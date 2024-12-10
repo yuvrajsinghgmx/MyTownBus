@@ -1,6 +1,6 @@
 # urls.py
 from django.urls import path
-from .views import FindScheduledTripsView ,SignupView ,LoginView,UserProfileView,LogoutView,AvailableSeatsView,BookSeatsView,ConfirmBookingView
+from .views import FindScheduledTripsView ,SignupView ,LoginView,UserProfileView,LogoutView,AvailableSeatsView,BookSeatsView,ConfirmBookingView,SeatCreateView
 from . import views
 
 
@@ -32,4 +32,5 @@ urlpatterns = [
     path('seats/<int:schedule_id>/available/', AvailableSeatsView.as_view(), name='available-seats'),
     path('seats/book/', BookSeatsView.as_view(), name='book-seats'),
     path('booking/<str:booking_id>/confirm/', ConfirmBookingView.as_view(), name='confirm-booking'),
+    path('seats/', SeatCreateView.as_view(), name='seat-create'),
 ]

@@ -159,9 +159,6 @@ class BookSeatsView(APIView):
                 if seats.count() != len(seat_numbers):
                     return Response({"error": "Some seats are already booked or unavailable."}, status=status.HTTP_400_BAD_REQUEST)
                 seats.update(status='2')
-                print(seats)
-                print(seat_numbers)
-                print(schedule_id)
                 booking = Booking.objects.create(
                     code=f"BOOK-{random.randint(1000, 9999)}",
                     name=name,
@@ -195,3 +192,12 @@ class ConfirmBookingView(APIView):
             return Response({"message": "Booking confirmed successfully."}, status=status.HTTP_200_OK)
         except Booking.DoesNotExist:
             return Response({"error": "Booking not found or already confirmed."}, status=status.HTTP_404_NOT_FOUND)
+        
+
+class SeatCreateView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = SeatSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

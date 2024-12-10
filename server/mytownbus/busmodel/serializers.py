@@ -57,7 +57,7 @@ class UserSerializer(serializers.ModelSerializer):
 class SeatSerializer(serializers.ModelSerializer):
     class Meta:
         model = Seat
-        fields = ['id', 'schedule_id', 'seat_number', 'status', 'date_created', 'date_updated']
+        fields = ['id', 'schedule', 'seat_number', 'status', 'date_created', 'date_updated']
 
 class BookingSerializer(serializers.ModelSerializer):
     seats = SeatSerializer(many=True)
