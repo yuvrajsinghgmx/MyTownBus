@@ -156,7 +156,6 @@ class BookSeatsView(APIView):
         try:
             with transaction.atomic():
                 seats = Seat.objects.filter(seat_number__in=seat_numbers, schedule_id=schedule_id, status='1')
-
                 if seats.count() != len(seat_numbers):
                     return Response({"error": "Some seats are already booked or unavailable."}, status=status.HTTP_400_BAD_REQUEST)
                 seats.update(status='2')
@@ -183,12 +182,15 @@ class BookSeatsView(APIView):
 
 class ConfirmBookingView(APIView):
     def post(self, request, booking_id):
+        seat_numbers = request.data.get('seat_numbers', [])
         try:
+            seats = Seat.objects.filter(seat_number__in=seat_numbers, status='2')
             booking = Booking.objects.get(code=booking_id, status='1')
             booking.status = '2'
             booking.payment_reference = request.data.get('payment_reference', 'N/A')
             booking.finalize_booking()
             booking.save()
+            seats.update(status = '3')
 
             return Response({"message": "Booking confirmed successfully."}, status=status.HTTP_200_OK)
         except Booking.DoesNotExist:

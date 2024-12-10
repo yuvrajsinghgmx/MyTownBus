@@ -54,6 +54,7 @@ const SeatSelection = () => {
         pathname: "./ConfirmBooking",
         params: {
           bookingId: bookingId,
+          selectedSeats : selectedSeats,
         },
       });
     } catch (error) {
