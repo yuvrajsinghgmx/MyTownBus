@@ -7,14 +7,12 @@ import { router,useLocalSearchParams } from "expo-router";
 
 const ConfirmBooking = () => {
   const { bookingId } = useLocalSearchParams();
-  const route = useRoute();
-  const navigation = useNavigation();
   const [paymentReference, setPaymentReference] = useState("123456789");
 
   const confirmBooking = async () => {
-    try {
+    try { 
       const response = await axios.post(
-        `http://192.168.1.75:8000/bookings/${bookingId}/confirm/,`,
+        `http://192.168.1.75:8000/booking/BOOK-8370/confirm/,`,
         { payment_reference: paymentReference }
       );
       console.log("Booking confirmed:", response.data);
