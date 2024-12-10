@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { router,useLocalSearchParams } from "expo-router";
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import axios from "axios";
+
 
 interface Seat {
   id: number;
@@ -8,15 +10,20 @@ interface Seat {
   status: string;
 }
 
-const SeatSelection = ({ scheduleId }: { scheduleId: number }) => {
+
+
+const SeatSelection = () => {
+  const { scheduleId } = useLocalSearchParams();
   const [seats, setSeats] = useState<Seat[]>([]);
   const [selectedSeats, setSelectedSeats] = useState<number[]>([]);
 
   useEffect(() => {
     const fetchSeats = async () => {
+
       try {
+        console.log(`${scheduleId}`)
         const response = await axios.get(
-          `http://192.168.1.75:8000/seats/2/available`
+          `http://192.168.1.75:8000/seats/${scheduleId}/available`
         );
         setSeats(response.data);
       } catch (error) {
@@ -37,12 +44,20 @@ const SeatSelection = ({ scheduleId }: { scheduleId: number }) => {
       const response = await axios.post(
         "http://192.168.1.75:8000/seats/book/",
         {
-          seat_ids: selectedSeats,
+          seat_numbers: selectedSeats,
           schedule_id: scheduleId,
           user_id: 1,
+          name : "Yuvraj Singh",
         }
       );
+      const bookingId = response.data.booking_id;
       console.log("Booking successful:", response.data);
+      router.push({
+        pathname : "./ConfirmBooking",
+        params : {
+          bookingId : bookingId,
+        }
+      })
     } catch (error) {
       console.error("Error booking seats:", error);
     }
@@ -65,6 +80,7 @@ const SeatSelection = ({ scheduleId }: { scheduleId: number }) => {
       disabled={seat.status !== "1"}
       onPress={() => toggleSeatSelection(seat.id)}
     >
+      <Text>💺</Text>
       <Text className="text-white font-bold">
         {seat.seat_number} {seat.status === "1" ? "🟩" : seat.status === "2" ? "🟦" : "🟥"}
       </Text>

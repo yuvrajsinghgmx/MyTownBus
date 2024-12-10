@@ -31,7 +31,7 @@ interface Trip {
 }
 
 export default function Buses() {
-  const { api, depart, arrive, date } = useLocalSearchParams();
+  const { api,depart, arrive, date } = useLocalSearchParams();
   const [trips, setTrips] = useState<Trip[]>([]);
 
   useFocusEffect(

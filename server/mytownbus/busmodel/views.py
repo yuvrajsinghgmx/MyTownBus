@@ -1,5 +1,6 @@
 # views.py
 import random
+from django.db import transaction
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from rest_framework import generics
@@ -146,37 +147,43 @@ class AvailableSeatsView(APIView):
 class BookSeatsView(APIView):
     def post(self, request):
         schedule_id = request.data.get('schedule_id')
-        seat_ids = request.data # '1' for available.get('seat_ids', [])
+        seat_numbers = request.data.get('seat_numbers', [])
         name = request.data.get('name')
 
-        # Fetch available seats
-        seats = Seat.objects.filter(id__in=seat_ids, schedule_id=schedule_id, status='1')
+        if not schedule_id or not seat_numbers or not name:
+            return Response({"error": "Missing required fields: schedule_id, seat_numbers, or name."}, status=status.HTTP_400_BAD_REQUEST)
 
-        if seats.count() != len(seat_ids):
-            return Response({"error": "Some seats are already booked or unavailable."}, status=status.HTTP_400_BAD_REQUEST)
-        seats.update(status='2')
-        booking = Booking.objects.create(
-            code=f"BOOK-{random.randint(1000, 9999)}",
-            name=name,
-            schedule_id=schedule_id,
-            status='1'
-        )
-        booking.seats.set(seats)
-        booking.save()
+        try:
+            with transaction.atomic():
+                seats = Seat.objects.filter(seat_number__in=seat_numbers, schedule_id=schedule_id, status='1')
 
-        return Response({
-            "message": "Booking created successfully.",
-            "booking_id": booking.id,
-            "total_fare": booking.total_payable()
-        }, status=status.HTTP_201_CREATED)
+                if seats.count() != len(seat_numbers):
+                    return Response({"error": "Some seats are already booked or unavailable."}, status=status.HTTP_400_BAD_REQUEST)
+                seats.update(status='2')
+                booking = Booking.objects.create(
+                    code=f"BOOK-{random.randint(1000, 9999)}",
+                    name=name,
+                    schedule_id=schedule_id,
+                    status='1'
+                )
+                booking.seats.set(seats)
+                booking.save()
+                return Response({
+                    "message": "Seats successfully booked!",
+                    "booking_code": booking.code,
+                    "booked_seats": [seat.seat_number for seat in seats]
+                }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({"error": f"An error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class ConfirmBookingView(APIView):
     def post(self, request, booking_id):
         try:
             booking = Booking.objects.get(id=booking_id, status='1')  # Pending payment
-            booking.status = '2'  # '2' for paid
+            booking.status = '2'
             booking.payment_reference = request.data.get('payment_reference', 'N/A')
-            booking.finalize_booking()  # Mark seats as booked
+            booking.finalize_booking()
             booking.save()
 
             return Response({"message": "Booking confirmed successfully."}, status=status.HTTP_200_OK)
