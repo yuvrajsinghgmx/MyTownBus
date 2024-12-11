@@ -19,7 +19,7 @@ class BusAdmin(admin.ModelAdmin):
     search_fields = ['bus_number', 'category__name']
 
 class ScheduleAdmin(admin.ModelAdmin):
-    list_display = ['code', 'bus', 'depart', 'destination', 'schedule', 'fare', 'status', 'date_created', 'date_updated']
+    list_display = ['id','code', 'bus', 'depart', 'destination', 'schedule', 'fare', 'status', 'date_created', 'date_updated']
     search_fields = ['code', 'bus__bus_number', 'depart__location', 'destination__location']
 
 class BookingAdmin(admin.ModelAdmin):

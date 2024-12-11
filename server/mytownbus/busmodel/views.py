@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from rest_framework import generics
 from .models import Category, Location, Bus, Schedule, Booking , User , Seat
-from .serializers import CategorySerializer, LocationSerializer, BusSerializer, ScheduleSerializer, BookingSerializer ,UserSerializer , SeatSerializer
+from .serializers import CategorySerializer, LocationSerializer, BusSerializer, ScheduleSerializer, BookingSerializer ,UserSerializer , SeatSerializer,NewScheduleSerializer
 # views.py
 from rest_framework import generics
 from rest_framework.response import Response
@@ -200,4 +200,12 @@ class SeatCreateView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class AddScheduleView(APIView):
+    def post(self, request):
+        serializer = NewScheduleSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Schedule added successfully", "data": serializer.data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

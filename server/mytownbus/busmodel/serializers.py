@@ -1,6 +1,7 @@
 
 from rest_framework import serializers
 from .models import Category, Location, Bus, Schedule, Booking,User , Seat
+from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -26,13 +27,6 @@ class ScheduleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Schedule
         fields = ['id', 'code', 'bus', 'depart', 'destination', 'schedule', 'fare', 'status', 'date_created', 'date_updated']
-
-# class BookingSerializer(serializers.ModelSerializer):
-#     schedule = ScheduleSerializer()
-
-#     class Meta:
-#         model = Booking
-#         fields = ['id', 'code', 'name', 'schedule', 'seats', 'status', 'date_created', 'date_updated']
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -75,3 +69,12 @@ class BookingSerializer(serializers.ModelSerializer):
             seat.save()
             booking.seats.add(seat)
         return booking
+    
+class NewScheduleSerializer(serializers.ModelSerializer):
+    bus = PrimaryKeyRelatedField(queryset=Bus.objects.all())
+    depart = PrimaryKeyRelatedField(queryset=Location.objects.all())
+    destination = PrimaryKeyRelatedField(queryset=Location.objects.all())
+
+    class Meta:
+        model = Schedule
+        fields = ['code', 'bus', 'depart', 'destination', 'schedule', 'fare', 'status','id']
