@@ -29,8 +29,8 @@ urlpatterns = [
     path('api/login/', LoginView.as_view(), name='login'),
     path('api/profile/', UserProfileView.as_view(), name='user-profile'),
     path('api/logout/', LogoutView.as_view(), name='logout'),
-    path('seats/<int:schedule_id>/available/', AvailableSeatsView.as_view(), name='available-seats'),
-    path('seats/book/', BookSeatsView.as_view(), name='book-seats'),
-    path('booking/<str:booking_id>/confirm/', ConfirmBookingView.as_view(), name='confirm-booking'),
-    path('seats/', SeatCreateView.as_view(), name='seat-create'),
+    path('api/seats/<int:schedule_id>/available/', AvailableSeatsView.as_view(), name='available-seats'),
+    path('api/seats/book/', BookSeatsView.as_view(), name='book-seats'),
+    path('api/booking/<str:booking_id>/confirm/', ConfirmBookingView.as_view(), name='confirm-booking'),
+    path('api/seats/', SeatCreateView.as_view(), name='seat-create'),
 ]

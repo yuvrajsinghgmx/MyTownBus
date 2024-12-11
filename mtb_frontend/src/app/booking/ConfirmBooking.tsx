@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import axios from "axios";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { router,useLocalSearchParams } from "expo-router";
+import Global from "../../api/api";
 
 
 const ConfirmBooking = () => {
@@ -12,7 +13,7 @@ const ConfirmBooking = () => {
   const confirmBooking = async () => {
     try { 
       const response = await axios.post(
-        `http://192.168.1.75:8000/booking/${bookingId}/confirm/`,
+        `${Global.api}/booking/${bookingId}/confirm/`,
         { 
           payment_reference: paymentReference,
           seat_numbers: selectedSeats,

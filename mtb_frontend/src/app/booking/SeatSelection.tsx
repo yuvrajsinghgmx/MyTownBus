@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import axios from "axios";
+import Global from "../../api/api";
 
 interface Seat {
   id: number;
@@ -10,16 +11,17 @@ interface Seat {
 }
 
 const SeatSelection = () => {
-  const { scheduleId } = useLocalSearchParams();
+  const { scheduleId,fare} = useLocalSearchParams();
   const [seats, setSeats] = useState<Seat[]>([]);
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]); 
+  let numericFare =  +fare;
 
   useEffect(() => {
     const fetchSeats = async () => {
       try {
         console.log(`${scheduleId}`);
         const response = await axios.get(
-          `http://192.168.1.75:8000/seats/${scheduleId}/available`
+          `${Global.api}/seats/${scheduleId}/available`
         );
         setSeats(response.data);
       } catch (error) {
@@ -41,7 +43,7 @@ const SeatSelection = () => {
     try {
       console.log(`${selectedSeats}`);
       const response = await axios.post(
-        "http://192.168.1.75:8000/seats/book/",
+        `${Global.api}/seats/book/`,
         {
           seat_numbers: selectedSeats,
           schedule_id: scheduleId,
@@ -95,7 +97,12 @@ const SeatSelection = () => {
         <Text className="text-center text-white font-bold">
           Book {selectedSeats.length} Seats
         </Text>
+        
+        
       </TouchableOpacity>
+      <Text>
+          Total Amount : {selectedSeats.length* numericFare}
+        </Text>
     </View>
   );
 };

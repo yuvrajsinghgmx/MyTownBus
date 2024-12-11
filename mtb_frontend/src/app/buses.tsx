@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { router, useLocalSearchParams } from "expo-router";
 import axios from "axios";
+import Global from "../api/api";
 
 
 interface Location {
@@ -40,7 +41,7 @@ export default function Buses() {
 
       const fetchTrips = async () => {
         try {
-          const response = await axios.get(`http://192.168.1.75:8000/api/scheduled-trips/`, {
+          const response = await axios.get(`${Global.api}/scheduled-trips/`, {
             params: {
               depart: depart,
               destination: arrive,
@@ -106,6 +107,7 @@ export default function Buses() {
                     pathname : "./booking/SeatSelection",
                     params : {
                       scheduleId : trip.id,
+                      fare : trip.fare,
                     }
                   })
                   console.log("Booking trip:", trip.id);
