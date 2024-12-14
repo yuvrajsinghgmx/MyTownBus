@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from rest_framework import generics
 from .models import Category, Location, Bus, Schedule, Booking , User , Seat
-from .serializers import CategorySerializer, LocationSerializer, BusSerializer, ScheduleSerializer, BookingSerializer ,UserSerializer , SeatSerializer,NewScheduleSerializer
+from .serializers import CategorySerializer, LocationSerializer, BusSerializer, ScheduleSerializer, BookingSerializer ,UserSerializer , SeatSerializer,NewScheduleSerializer,BookedSerializer
 # views.py
 from rest_framework import generics
 from rest_framework.response import Response
@@ -145,6 +145,7 @@ class AvailableSeatsView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class BookSeatsView(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         schedule_id = request.data.get('schedule_id')
         seat_numbers = request.data.get('seat_numbers', [])
@@ -209,3 +210,13 @@ class AddScheduleView(APIView):
             serializer.save()
             return Response({"message": "Schedule added successfully", "data": serializer.data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class BookedView(APIView):
+    def get(self,request):
+        name = request.query_params.get('name')
+        if not name:
+            return Response({"error": "Name parameter is required"}, status=400)
+        bookings = Booking.objects.filter(name__icontains=name)
+        serializer = BookedSerializer(bookings, many=True)
+        
+        return Response({"bookings": serializer.data})

@@ -95,3 +95,11 @@ class NewScheduleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Schedule
         fields = ['code', 'bus', 'depart', 'destination', 'schedule', 'fare', 'status','id']
+
+class BookedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Booking
+        fields = [
+            'name', 'schedule','seat_numbers', 'status', 
+            'payment_reference', 'date_created',
+        ]

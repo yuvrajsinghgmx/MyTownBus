@@ -34,4 +34,5 @@ urlpatterns = [
     path('api/booking/<str:booking_id>/confirm/', ConfirmBookingView.as_view(), name='confirm-booking'),
     path('api/seats/', SeatCreateView.as_view(), name='seat-create'),
     path('api/add-schedule/', AddScheduleView.as_view(), name='add-schedule'),
+    path('api/bookings/', views.BookedView.as_view(), name='bookings_by_name'),
 ]
