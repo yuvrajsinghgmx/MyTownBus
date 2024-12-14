@@ -32,7 +32,25 @@ class ScheduleSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'name', 'age', 'gender', 'phone', 'address']
+        fields = ['username', 'password', 'name', 'age', 'gender', 'phone', 'address']
+        extra_kwargs = {'password': {'write_only': True}}
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            password=validated_data['password'],
+            name=validated_data['name'],
+            age=validated_data.get('age'),
+            gender=validated_data.get('gender'),
+            phone=validated_data['phone'],
+            address=validated_data.get('address'),
+        )
+        return user
+
+
+class EditUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username','password', 'name', 'age', 'gender', 'phone', 'address']
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -45,7 +63,6 @@ class UserSerializer(serializers.ModelSerializer):
         instance.gender = validated_data.get('gender', instance.gender)
         instance.phone = validated_data.get('phone', instance.phone)
         instance.address = validated_data.get('address', instance.address)
-        instance.save()
         return instance
     
 class SeatSerializer(serializers.ModelSerializer):
