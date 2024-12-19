@@ -3,7 +3,6 @@ import { Text, View, StyleSheet, Image, ScrollView, Alert, Modal, TextInput, But
 import { Ionicons } from "@expo/vector-icons";
 import { Link, router } from "expo-router";
 import ProfileOption from "../components/ProfileOption";
-import { auth } from "../components/firebase/firebaseConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
@@ -48,7 +47,7 @@ export default function Profile() {
         <View style={styles.userInfoContainer}>
           <Image
             source={{
-              uri: auth.currentUser?.photoURL ?? "https://via.placeholder.com/100",
+              uri: "https://via.placeholder.com/100",
             }}
             style={styles.profileImage}
           />

@@ -15,7 +15,8 @@ interface Bus {
 }
 
 interface Schedule {
-  date: Date;
+  code:String;
+  schedule: String;
   departLocation: number;
   destinationLocation: number;
   bus: number;
@@ -79,6 +80,37 @@ export default function ScheduleManagement() {
     return true;
   };
 
+  const submitmySchedules = async () => {
+    if (schedules.length === 0) {
+      Alert.alert('Error', 'No schedules to submit.');
+      return;
+    }
+  
+    try {
+      const response = await fetch(`${Global.api}/add-schedules/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ schedules }),
+      });
+  
+      if (response.ok) {
+        Alert.alert('Success', 'All schedules have been submitted successfully');
+        setSchedules([]);
+        resetForm();
+      } else {
+        const errorData = await response.json();
+        console.error('Error response:', errorData);
+        Alert.alert('Error', 'Failed to add schedules. Please check your inputs.');
+      }
+    } catch (error) {
+      console.error('Error submitting schedules:', error);
+      Alert.alert('Error', 'Failed to submit schedules.');
+    }
+  };
+  
+
   const generateSchedules = () => {
     if (!validateInputs()) return;
 
@@ -92,7 +124,8 @@ export default function ScheduleManagement() {
     }
 
     const newSchedules = dates.map((date) => ({
-      date,
+      code: `${bus}${date.getDate()}${date.getMonth() + 1}`,
+      schedule: date.toISOString(),
       departLocation,
       destinationLocation,
       bus,
@@ -236,14 +269,14 @@ export default function ScheduleManagement() {
             <Text className="text-lg font-bold mb-2">Generated Schedules</Text>
             {schedules.map((schedule, index) => (
               <Text key={index} className="text-gray-700">
-                {`${schedule.date.toDateString()} - Bus: ${schedule.bus}, Route: ${schedule.departLocation} to ${schedule.destinationLocation}, Fare: ${schedule.fare}`}
+                {`Code: ${schedule.code} ,${schedule.schedule} - Bus: ${schedule.bus}, Route: ${schedule.departLocation} to ${schedule.destinationLocation}, Fare: ${schedule.fare}`}
               </Text>
             ))}
           </View>
         )}
 
         <TouchableOpacity
-          onPress={submitSchedules}
+          onPress={submitmySchedules}
           className="bg-green-500 p-4 rounded-lg"
         >
           <Text className="text-white font-semibold">Submit All Schedules</Text>
