@@ -10,6 +10,8 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Global from "../../api/api";
+import axios from "axios";
 
 const ProfileScreen = () => {
   const router = useRouter();
@@ -30,14 +32,13 @@ const ProfileScreen = () => {
             return;
           }
 
-          const response = await fetch("http://192.168.1.75:8000/api/profile/", {
+          const response = await fetch(`${Global.api}/profile/`, {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
               Authorization: `Token ${token}`,
             },
           });
-
           if (response.ok) {
             const data = await response.json();
             setName(data.name || "");
@@ -70,7 +71,7 @@ const ProfileScreen = () => {
         return;
       }
 
-      const response = await fetch("http://192.168.1.75:8000/api/profile/", {
+      const response = await fetch(`${Global.api}/profile/`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -103,7 +104,9 @@ const ProfileScreen = () => {
   const handleLogout = async () => {
     try {
       const token = await AsyncStorage.getItem("authToken");
-      const response = await fetch("http://192.168.1.75:8000/api/logout/", {
+      await AsyncStorage.multiRemove(["authToken","userName"]); 
+      // Remove upper line
+      const response = await fetch(`${Global.api}/logout/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -112,7 +115,7 @@ const ProfileScreen = () => {
       });
 
       if (response.ok) {
-        await AsyncStorage.multiRemove(["authToken"]);
+        await AsyncStorage.multiRemove(["authToken","userName"]);
         Alert.alert("Logged out", "You have been successfully logged out.");
         router.replace("./login");
       } else {

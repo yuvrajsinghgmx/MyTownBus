@@ -23,7 +23,7 @@ const LoginSignupScreen: React.FC = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/login/`, {username : username, password: password,name :name });
+      const response = await axios.post(`${Global.api}/login/`, {username : username, password: password,name :name });
       const { token } = response.data;
       await AsyncStorage.setItem("authToken", token);
       await AsyncStorage.setItem("userName", username);

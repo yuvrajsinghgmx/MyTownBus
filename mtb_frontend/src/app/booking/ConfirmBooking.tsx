@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import axios from "axios";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { router,useLocalSearchParams } from "expo-router";
 import Global from "../../api/api";
+import BookingScreen from "../bookings";
 
 
 const ConfirmBooking = () => {
@@ -21,6 +22,8 @@ const ConfirmBooking = () => {
         }
       );
       console.log("Booking confirmed:", response.data);
+      Alert.alert("Ticket Booked Successfully !")
+      router.push('../bookings')
     } catch (error) {
       console.error("Error confirming booking:", error);
     }

@@ -11,7 +11,7 @@ export default function Profile() {
   const [token, setToken] = useState<string | null>(null);
   const [isModalVisible, setModalVisible] = useState(false);
   const [password, setPassword] = useState("");
-  const name = auth.currentUser?.displayName ?? "Login to avail offers and more";
+  const [name,setName]=useState("Login to avail offers and more");
   const fetchToken = async () => {
     try {
       const storedToken = await AsyncStorage.getItem("authToken");
@@ -31,6 +31,9 @@ export default function Profile() {
     }
     setPassword("");
   };
+  fetchToken();
+
+
   return (
     
     <ScrollView style={styles.container}>
@@ -50,7 +53,9 @@ export default function Profile() {
             style={styles.profileImage}
           />
           <View style={styles.userDetails}>
-            <Text style={styles.userName}>{name}</Text>
+            <Text style={styles.userName}>
+            Your Profile
+            </Text>
             <Ionicons name="chevron-forward-outline" size={24} color="gray" />
           </View>
         </View>
