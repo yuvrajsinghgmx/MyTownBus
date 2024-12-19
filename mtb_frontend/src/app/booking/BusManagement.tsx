@@ -1,164 +1,253 @@
-import React, { useState } from "react";
-import { Text, View, TextInput, Button, ScrollView } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { Link, router } from "expo-router";
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Alert } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Picker } from '@react-native-picker/picker';
+import Global from '../../api/api';
 
-export default function BusManagement() {
-  const [busName, setBusName] = useState("");
-  const [sleeperSeats, setSleeperSeats] = useState(0);
-  const [semiSleeperSeats, setSemiSleeperSeats] = useState(0);
-  const [generalSeats, setGeneralSeats] = useState(0);
-  const [source, setSource] = useState("");
-  const [destination, setDestination] = useState("");
-  const [stops, setStops] = useState([""]);
-  const [startDate, setStartDate] = useState("");
-  const [busList, setBusList] = useState([
-    { busName: "City Express", sleeper: 20, semiSleeper: 30, general: 50 },
-  ]);
+interface Location {
+  id: number;
+  location: string;
+}
 
-  const handleAddStop = () => {
-    setStops([...stops, ""]);
+interface Bus {
+  id: number;
+  bus_number: string;
+}
+
+interface Schedule {
+  date: Date;
+  departLocation: number;
+  destinationLocation: number;
+  bus: number;
+  fare: string;
+}
+
+export default function ScheduleManagement() {
+  const [fromDate, setFromDate] = useState<Date | null>(null);
+  const [toDate, setToDate] = useState<Date | null>(null);
+  const [showFromDatePicker, setShowFromDatePicker] = useState(false);
+  const [showToDatePicker, setShowToDatePicker] = useState(false);
+  const [departLocation, setDepartLocation] = useState<number>(0);
+  const [destinationLocation, setDestinationLocation] = useState<number>(0);
+  const [bus, setBus] = useState<number>(0);
+  const [fare, setFare] = useState<string>('');
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [buses, setBuses] = useState<Bus[]>([]);
+
+  useEffect(() => {
+    fetchLocations();
+    fetchBuses();
+  }, []);
+
+  const fetchLocations = async () => {
+    try {
+      const response = await fetch(`${Global.api}/location/`);
+      const data = await response.json();
+      setLocations(data.locations);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to fetch locations');
+    }
   };
 
-  const handleSaveBus = () => {
-    const newBus = {
-      busName,
-      sleeper: sleeperSeats,
-      semiSleeper: semiSleeperSeats,
-      general: generalSeats,
-      source,
-      destination,
-      stops,
-      startDate,
-    };
-    setBusList([...busList, newBus]);
-    setBusName("");
-    setSleeperSeats(0);
-    setSemiSleeperSeats(0);
-    setGeneralSeats(0);
-    setSource("");
-    setDestination("");
-    setStops([""]);
-    setStartDate("");
+  const fetchBuses = async () => {
+    try {
+      const response = await fetch(`${Global.api}/bus/`);
+      const data = await response.json();
+      setBuses(data.bus);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to fetch buses');
+    }
+  };
+
+  const validateInputs = () => {
+    if (!fromDate || !toDate || departLocation === 0 || destinationLocation === 0 || bus === 0 || !fare) {
+      Alert.alert('Validation Error', 'Please fill all the fields before generating schedules.');
+      return false;
+    }
+
+    if (fromDate > toDate) {
+      Alert.alert('Validation Error', '`From Date` cannot be later than `To Date`.');
+      return false;
+    }
+
+    if (departLocation === destinationLocation) {
+      Alert.alert('Validation Error', 'Departure and destination locations cannot be the same.');
+      return false;
+    }
+
+    return true;
+  };
+
+  const generateSchedules = () => {
+    if (!validateInputs()) return;
+
+    const dates = [];
+    const current = new Date(fromDate!);
+    const end = new Date(toDate!);
+
+    while (current <= end) {
+      dates.push(new Date(current));
+      current.setDate(current.getDate() + 1);
+    }
+
+    const newSchedules = dates.map((date) => ({
+      date,
+      departLocation,
+      destinationLocation,
+      bus,
+      fare,
+    }));
+
+    setSchedules(newSchedules);
+  };
+
+  const submitSchedules = async () => {
+    if (schedules.length === 0) {
+      Alert.alert('Error', 'No schedules to submit.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${Global.api}/location/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ schedules }),
+      });
+
+      if (response.ok) {
+        Alert.alert('Success', 'Schedules added successfully');
+        resetForm();
+      } else {
+        Alert.alert('Error', 'Failed to add schedules');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to submit schedules');
+    }
+  };
+
+  const resetForm = () => {
+    setSchedules([]);
+    setFromDate(null);
+    setToDate(null);
+    setDepartLocation(0);
+    setDestinationLocation(0);
+    setBus(0);
+    setFare('');
   };
 
   return (
-    <ScrollView className="bg-gray-100 p-4">
-      <Text className="text-2xl font-bold text-center mb-4">Bus Manager...</Text>
-      
-      {/* Bus Name */}
-      <TextInput
-        className="bg-white p-2 rounded-md mb-4"
-        placeholder="Bus Name"
-        value={busName}
-        onChangeText={setBusName}
-      />
-      
-      {/* Seat Types */}
-      <View className="flex-row justify-between mb-4">
-        <View className="w-1/3">
-          <Text className="text-sm">Sleeper</Text>
-          <TextInput
-            className="bg-white p-2 rounded-md"
-            keyboardType="numeric"
-            placeholder="Seats"
-            value={sleeperSeats.toString()}
-            onChangeText={(value) => setSleeperSeats(parseInt(value))}
-          />
-        </View>
-        <View className="w-1/3">
-          <Text className="text-sm">Semi-Sleeper</Text>
-          <TextInput
-            className="bg-white p-2 rounded-md"
-            keyboardType="numeric"
-            placeholder="Seats"
-            value={semiSleeperSeats.toString()}
-            onChangeText={(value) => setSemiSleeperSeats(parseInt(value))}
-          />
-        </View>
-        <View className="w-1/3">
-          <Text className="text-sm">General</Text>
-          <TextInput
-            className="bg-white p-2 rounded-md"
-            keyboardType="numeric"
-            placeholder="Seats"
-            value={generalSeats.toString()}
-            onChangeText={(value) => setGeneralSeats(parseInt(value))}
-          />
-        </View>
-      </View>
+    <ScrollView className="flex-1 bg-gray-100">
+      <View className="p-4">
+        <Text className="text-2xl font-bold mb-4">Add Schedules</Text>
 
-      {/* Source and Destination */}
-      <View className="mb-4">
-        <TextInput
-          className="bg-white p-2 rounded-md mb-2"
-          placeholder="Source"
-          value={source}
-          onChangeText={setSource}
-        />
-        <TextInput
-          className="bg-white p-2 rounded-md"
-          placeholder="Destination"
-          value={destination}
-          onChangeText={setDestination}
-        />
-      </View>
-
-      {/* Stops */}
-      <View className="mb-4">
-        <Text className="font-semibold">Stops:</Text>
-        {stops.map((stop, index) => (
-          <TextInput
-            key={index}
-            className="bg-white p-2 rounded-md mb-2"
-            placeholder={`Enter stop ${index + 1}`}
-            value={stop}
-            onChangeText={(text) => {
-              const newStops = [...stops];
-              newStops[index] = text;
-              setStops(newStops);
-            }}
-          />
-        ))}
-        <Button title="+ Add Stop" onPress={handleAddStop} />
-      </View>
-
-      {/* Start Date */}
-      <TextInput
-        className="bg-white p-2 rounded-md mb-4"
-        placeholder="Start Date"
-        value={startDate}
-        onChangeText={setStartDate}
-      />
-
-      {/* Add Bus Button */}
-      <Button
-        title="Add Bus"
-        onPress={handleSaveBus}
-        color="#FF7F32"
-      />
-
-      {/* Saved Buses List */}
-      <View className="mt-6">
-        <Text className="text-xl font-semibold mb-2">Available Buses</Text>
-        {busList.map((bus, index) => (
-          <View key={index} className="flex-row justify-between items-center bg-white p-4 mb-4 rounded-lg shadow-md">
-            <View>
-              <Text className="text-lg">{bus.busName}</Text>
-              <Text>Sleeper: {bus.sleeper}</Text>
-              <Text>Semi-Sleeper: {bus.semiSleeper}</Text>
-              <Text>General: {bus.general}</Text>
-            </View>
-            <Button
-              title="Delete"
-              onPress={() => {
-                const updatedBuses = busList.filter((_, i) => i !== index);
-                setBusList(updatedBuses);
+        <View className="mb-4">
+          <Text className="mb-1">From Date</Text>
+          <TouchableOpacity
+            onPress={() => setShowFromDatePicker(true)}
+            className="border border-gray-300 p-2 rounded"
+          >
+            <Text>{fromDate ? fromDate.toDateString() : 'Select From Date'}</Text>
+          </TouchableOpacity>
+          {showFromDatePicker && (
+            <DateTimePicker
+              value={fromDate || new Date()}
+              mode="date"
+              onChange={(event, date) => {
+                setShowFromDatePicker(false);
+                if (date) setFromDate(date);
               }}
-              color="red"
             />
+          )}
+        </View>
+
+        <View className="mb-4">
+          <Text className="mb-1">To Date</Text>
+          <TouchableOpacity
+            onPress={() => setShowToDatePicker(true)}
+            className="border border-gray-300 p-2 rounded"
+          >
+            <Text>{toDate ? toDate.toDateString() : 'Select To Date'}</Text>
+          </TouchableOpacity>
+          {showToDatePicker && (
+            <DateTimePicker
+              value={toDate || new Date()}
+              mode="date"
+              onChange={(event, date) => {
+                setShowToDatePicker(false);
+                if (date) setToDate(date);
+              }}
+            />
+          )}
+        </View>
+
+        <View className="mb-4">
+          <Text className="mb-1">Departure Location</Text>
+          <Picker selectedValue={departLocation} onValueChange={setDepartLocation}>
+            <Picker.Item label="Select Location" value={0} />
+            {locations.map((location) => (
+              <Picker.Item key={location.id} label={location.location} value={location.id} />
+            ))}
+          </Picker>
+        </View>
+
+        <View className="mb-4">
+          <Text className="mb-1">Destination Location</Text>
+          <Picker selectedValue={destinationLocation} onValueChange={setDestinationLocation}>
+            <Picker.Item label="Select Location" value={0} />
+            {locations.map((location) => (
+              <Picker.Item key={location.id} label={location.location} value={location.id} />
+            ))}
+          </Picker>
+        </View>
+
+        <View className="mb-4">
+          <Text className="mb-1">Bus</Text>
+          <Picker selectedValue={bus} onValueChange={setBus}>
+            <Picker.Item label="Select Bus" value={0} />
+            {buses.map((bus) => (
+              <Picker.Item key={bus.id} label={bus.bus_number} value={bus.id} />
+            ))}
+          </Picker>
+        </View>
+
+        <View className="mb-4">
+          <Text className="mb-1">Fare</Text>
+          <TextInput
+            className="border border-gray-300 rounded p-2"
+            value={fare}
+            onChangeText={setFare}
+            keyboardType="numeric"
+            placeholder="Enter fare amount"
+          />
+        </View>
+
+        <TouchableOpacity
+          onPress={generateSchedules}
+          className="bg-blue-500 p-4 rounded-lg mb-4"
+        >
+          <Text className="text-white font-semibold">Generate Schedules</Text>
+        </TouchableOpacity>
+
+        {schedules.length > 0 && (
+          <View className="mb-4">
+            <Text className="text-lg font-bold mb-2">Generated Schedules</Text>
+            {schedules.map((schedule, index) => (
+              <Text key={index} className="text-gray-700">
+                {`${schedule.date.toDateString()} - Bus: ${schedule.bus}, Route: ${schedule.departLocation} to ${schedule.destinationLocation}, Fare: ${schedule.fare}`}
+              </Text>
+            ))}
           </View>
-        ))}
+        )}
+
+        <TouchableOpacity
+          onPress={submitSchedules}
+          className="bg-green-500 p-4 rounded-lg"
+        >
+          <Text className="text-white font-semibold">Submit All Schedules</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
