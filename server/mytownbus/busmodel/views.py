@@ -21,6 +21,7 @@ from django.utils.dateparse import parse_datetime
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework import status
+from rest_framework.decorators import api_view
 
 
 
@@ -220,3 +221,56 @@ class BookedView(APIView):
         serializer = BookedSerializer(bookings, many=True)
         
         return Response({"bookings": serializer.data})
+    
+class ModifyLocationView(APIView):
+    def get(self, request):
+        locations = Location.objects.all()
+        serializer = LocationSerializer(locations, many=True)
+        return Response({"locations": serializer.data})
+
+    def post(self,request):
+        serializer = LocationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"Location Added Successfully"}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class ModifyBusView(APIView):
+    def get(self, request):
+        bus = Bus.objects.all()
+        serializer = BusSerializer(bus, many=True)
+        return Response({"bus": serializer.data})
+
+    def post(self,request):
+        serializer = BusSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"Location Added Successfully"}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['POST'])
+def add_schedules(request):
+    schedules_data = request.data.get('schedules', [])
+    if not schedules_data:
+        return Response({'error': 'No schedules provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+    created_schedules = []
+    for schedule_data in schedules_data:
+        try:
+            bus = Bus.objects.get(id=schedule_data['bus'])
+            depart = Location.objects.get(id=schedule_data['departLocation'])
+            destination = Location.objects.get(id=schedule_data['destinationLocation'])
+            schedule = Schedule.objects.create(
+                code=schedule_data['code'],
+                bus=bus,
+                depart=depart,
+                destination=destination,
+                schedule=schedule_data['schedule'],
+                fare=schedule_data['fare']
+            )
+            created_schedules.append(schedule)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response({'message': 'Schedules created successfully', 'created_schedules': len(created_schedules)}, status=status.HTTP_201_CREATED)
