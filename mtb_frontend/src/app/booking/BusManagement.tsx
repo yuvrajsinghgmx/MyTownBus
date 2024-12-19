@@ -31,6 +31,7 @@ export default function ScheduleManagement() {
   const [departLocation, setDepartLocation] = useState<number>(0);
   const [destinationLocation, setDestinationLocation] = useState<number>(0);
   const [bus, setBus] = useState<number>(0);
+  const [total_seats, setTotalSeats] = useState<string>('');
   const [fare, setFare] = useState<string>('');
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
@@ -130,6 +131,8 @@ export default function ScheduleManagement() {
       destinationLocation,
       bus,
       fare,
+      starting_seat: 11,
+      total_seats: parseInt(total_seats)
     }));
 
     setSchedules(newSchedules);
@@ -252,6 +255,17 @@ export default function ScheduleManagement() {
             className="border border-gray-300 rounded p-2"
             value={fare}
             onChangeText={setFare}
+            keyboardType="numeric"
+            placeholder="Enter fare amount"
+          />
+        </View>
+
+        <View className="mb-4">
+          <Text className="mb-1">Total Seats</Text>
+          <TextInput
+            className="border border-gray-300 rounded p-2"
+            value={total_seats}
+            onChangeText={setTotalSeats}
             keyboardType="numeric"
             placeholder="Enter fare amount"
           />

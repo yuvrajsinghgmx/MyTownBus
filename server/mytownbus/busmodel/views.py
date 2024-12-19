@@ -256,21 +256,35 @@ def add_schedules(request):
         return Response({'error': 'No schedules provided'}, status=status.HTTP_400_BAD_REQUEST)
 
     created_schedules = []
-    for schedule_data in schedules_data:
-        try:
-            bus = Bus.objects.get(id=schedule_data['bus'])
-            depart = Location.objects.get(id=schedule_data['departLocation'])
-            destination = Location.objects.get(id=schedule_data['destinationLocation'])
-            schedule = Schedule.objects.create(
-                code=schedule_data['code'],
-                bus=bus,
-                depart=depart,
-                destination=destination,
-                schedule=schedule_data['schedule'],
-                fare=schedule_data['fare']
-            )
-            created_schedules.append(schedule)
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        with transaction.atomic():
+            for schedule_data in schedules_data:
+                bus = Bus.objects.get(id=schedule_data['bus'])
+                depart = Location.objects.get(id=schedule_data['departLocation'])
+                destination = Location.objects.get(id=schedule_data['destinationLocation'])
+                schedule = Schedule.objects.create(
+                    code=schedule_data['code'],
+                    bus=bus,
+                    depart=depart,
+                    destination=destination,
+                    schedule=schedule_data['schedule'],
+                    fare=schedule_data['fare']
+                )
+                created_schedules.append(schedule)
 
-    return Response({'message': 'Schedules created successfully', 'created_schedules': len(created_schedules)}, status=status.HTTP_201_CREATED)
+                # Bulk seat creation
+                starting_seat = int(schedule_data.get('starting_seat', 1))
+                total_seats = int(schedule_data.get('total_seats', 0))
+                seats = [
+                    Seat(schedule=schedule, seat_number=str(starting_seat + i))
+                    for i in range(total_seats)
+                ]
+                Seat.objects.bulk_create(seats)
+
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response(
+        {'message': 'Schedules and seats created successfully', 'created_count': len(created_schedules)},
+        status=status.HTTP_201_CREATED
+    )
