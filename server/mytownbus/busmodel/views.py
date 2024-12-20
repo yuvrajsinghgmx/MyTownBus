@@ -245,7 +245,7 @@ class ModifyBusView(APIView):
         serializer = BusSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({"Location Added Successfully"}, status=status.HTTP_201_CREATED)
+            return Response({"Bus Added Successfully"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 

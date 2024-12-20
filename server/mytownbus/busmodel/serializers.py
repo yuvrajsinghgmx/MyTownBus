@@ -14,11 +14,17 @@ class LocationSerializer(serializers.ModelSerializer):
         fields = ['id', 'location', 'status', 'date_created', 'date_updated']
 
 class BusSerializer(serializers.ModelSerializer):
-    category = CategorySerializer()
+    category = CategorySerializer() 
+
     class Meta:
         model = Bus
         fields = ['id', 'category', 'bus_number', 'seats', 'status', 'date_created', 'date_updated']
 
+    def create(self, validated_data):
+        category_data = validated_data.pop('category') 
+        category = Category.objects.create(**category_data)
+        bus = Bus.objects.create(category=category, **validated_data) 
+        return bus
 class ScheduleSerializer(serializers.ModelSerializer):
     bus = BusSerializer()
     depart = LocationSerializer()
